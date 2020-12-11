@@ -18,7 +18,7 @@ class Control:
 		self.atoms = a
 	def Modematch(self):
 		print("Shifting ", self.xtal, " Frequencies...")
-		CurrentDir = os.getcwd() + os.path.sep + 'datafiles'
+		CurrentDir = os.getcwd()
 		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		AllFreqs = []
 		for x in range(self.count):
@@ -181,6 +181,7 @@ class Control:
 			ss_freqs = Freqs[x,:]
 			NewFreqs = modematch.Match(self.atoms,ss_freqs,RefFreqFile,ShiftFreqFile)
 			AllFreqs = np.append(AllFreqs, NewFreqs)
+
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
 		return AllFreqs
 

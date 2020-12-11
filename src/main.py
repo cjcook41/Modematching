@@ -39,13 +39,14 @@ P2Count = int(len(p2freq_vols))
 if PhaseTrans == False:
 	P1Control = JobControl.Control(poly1, P1Count, P1atom_IDs)
 	P1Control.MakePaths()
+
 	if acoustic_ID[0].lower() == 'true' and acoustic_ID[1].lower() == 'true':
 		AllConstants = P1Control.SolveECs()
 		NewAcoustics = P1Control.Dispersion(AllConstants)
 		ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
 
 	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
-		ShiftedFreqs = P1Control.Modematch()
+		ShiftedFreqs = P1Control.Modematch()[0]
 
 	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
 		AllConstants = P1Control.ReadECs()
@@ -64,6 +65,7 @@ if PhaseTrans == False:
 									'Helmholtz': np.array(Fvib)})
 	else:
 		ThermoData = P1Control.QuasiHarmonic(ShiftedFreqs,p1freq_vols,Press)
+
 	filename = poly1 + '.csv'
 	ThermoData.to_csv(filename,index=False)
 	print('JOB SUCCESSFUL!!')

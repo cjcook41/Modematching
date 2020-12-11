@@ -19,7 +19,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 	TArray = []	
 	OptVolArray = []
 	OptGibbsArray = []
-	OptFvibArray = []
+	OptFvibArray = [] 
 	OptSvibArray = []
 	OptHvibArray = []
 	OptElArray = []

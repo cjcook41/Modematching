@@ -5,7 +5,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		dim = sum(atom_IDs) * 3
 		bohr2ang = 0.529177 ## YAML files start in bohr
 		ss_params = data.ReadYaml(SSFreqFile)
-		[ss_freqs, mesh] = ss_params.get_SS()
+		mesh = ss_params.get_SS()[1]
 		lattice = lattice.reshape([3,3]) * bohr2ang
 
 		##IN ANGSTROM
@@ -134,7 +134,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		all_ids = np.append(all_ids, all_ids[-1])
 		TotKpts = np.size(all_ids)
 
-		[ss_freqs, mesh] = ss_params.get_SS()
+		ss_freqs = ss_params.get_SS()[0]
 		ss_freqs = np.reshape(ss_freqs,(-1, dim))
 		DispFreqs = []
 
