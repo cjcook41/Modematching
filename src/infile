@@ -1,0 +1,26 @@
+\$P1atoms
+C   4
+H   0
+O   8
+N   0
+S   0
+\*
+
+\$crystals
+alpha
+\*
+
+
+\$acoustics
+Christoffel true
+EC False
+\*
+
+\$P1volumes
+175.398
+179.140
+182.935
+192.656
+\*
+
+

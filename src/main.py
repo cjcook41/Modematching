@@ -52,7 +52,11 @@ if PhaseTrans == False:
 		ShiftedFreqs = P1Control.Modematch()
 
 	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		print('Need EC as an input; implement this')
+		AllConstants = P1Control.ReadECs()
+		NewAcoustics = P1Control.Dispersion(AllConstants)
+		ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
+
+		#print('Need EC as an input; implement this')
 
 	#Now we have the shifted freqs...
 	if P1Count == 1:

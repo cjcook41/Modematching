@@ -1,28 +1,18 @@
 import ReadData as data
-import ElasticConstants as ECs
 import numpy as np
-import matplotlib.pyplot as plt
 
-def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
-#Can delete this when integrated in modematch
-		#atom_info = data.ReadAtoms("atoms")
-		#atom_ID = atom_info.id()
+def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		dim = sum(atom_IDs) * 3
-
-		#ss_freqs = ss_freqs.transpose()
+		bohr2ang = 0.529177 ## YAML files start in bohr
 		ss_params = data.ReadYaml(SSFreqFile)
 		[ss_freqs, mesh] = ss_params.get_SS()
-		
-		#MIGHT NEED TRANSPOSE
-		ss_freqs = np.reshape(ss_freqs,(-1, dim))
 
-		lattice_info = data.ReadLattice(LattFile)
-		lattice_vectors = lattice_info.get_vecs()
+		lattice = lattice.reshape([3,3]) * bohr2ang
 
 		##IN ANGSTROM
-		a = lattice_vectors[0,:]
-		b = lattice_vectors[1,:]
-		c = lattice_vectors[2,:]
+		a = lattice[0,:]
+		b = lattice[1,:]
+		c = lattice[2,:]
 
 		v_cross = np.cross(b,c)
 		v_dot = np.dot(a,v_cross)
@@ -46,7 +36,6 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
 		bar = 1000
 		Pa = 100000
 		wvnum = 33.35641
-		Ang2m = 1e10
 
 		mass_tot = (num_C * mass_C + num_H * mass_H + num_O * mass_O + num_N * mass_N) * mass_kg #In kg
 
@@ -55,11 +44,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
 		C = np.reshape(ECs, (6,6))
 		C = C * bar * Pa # Elastic constant matrix In Pa
 
-		acoustic_soundvel = []
 		Christoffel_Mat = np.zeros([3,3])
-		d_cos = []
-		debye_freqs = []
-		SpringConst = []
 
 		kpt_sampling_directions = np.array([0.5,0,0,
 											0,0.5,0,
@@ -101,7 +86,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
 			
 			PhaseVelocity = np.linalg.eig(Christoffel_Mat)[0] # = pv^2
 
-			kzb_vec = np.linalg.norm(kpt_sampling_directions[i,:] * lattice_vectors)
+			kzb_vec = np.linalg.norm(kpt_sampling_directions[i,:] * lattice)
 			kzb = (np.pi / (kzb_vec * 1E-10))
 
 			PhaseVelocity = np.transpose(PhaseVelocity)
@@ -134,6 +119,9 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
 			dir_id = np.nonzero(direction)[0]
 			direction2 = x1
 			direction2[dir_id] = 0.5 #Edge of BZ to search for 13 "Base" kpt directions
+
+			if np.linalg.norm(x2) == 0 and np.linalg.norm(x1) == 0:
+				all_ids = np.append(all_ids,all_ids[-1])
 			
 			for j in range(np.size(kpt_sampling_directions[:,0])):
 				bool_array = []
@@ -151,7 +139,6 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
 		#Add ID for endpoint
 		all_ids = np.append(all_ids, all_ids[-1])
 		TotKpts = np.size(all_ids)
-			#print(direction2)
 
 		#mesh = ss_params.get_kpts() #Mesh gets overwritten for some reason ???? Have to recreate it
 		[ss_freqs, mesh] = ss_params.get_SS()
@@ -164,11 +151,9 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,LattFile):
 			#print(np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:]))
 			
 			y = avg_Wmax * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])) * np.pi / 2))
-		#xRange = []
-		#yRange = []
+
 			DispFreqs = np.append(DispFreqs,y)
 
-		Xrange = np.linspace(0,TotKpts,TotKpts)
 		DispFreqs = DispFreqs.reshape([-1,3])
 		#print(DispFreqs / wvnum)
 		ss_freqs[:,0] = DispFreqs[:,0] / wvnum
