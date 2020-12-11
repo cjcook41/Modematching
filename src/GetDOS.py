@@ -1,17 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.stats as stats
-import GetThermo as therm_init
-import pandas as pd
 
 def EvaluateDOS(ssfreqs, natoms):
 	ThzToCm = 33.35640952
-	h = 6.62607363e-34
 	Na = 6.0221367e23
 	kb = 1.3806488e-23
 	R = kb*Na
-	c = 2.99792458e8
-	#natoms = sum(natoms)
 	dim = 3 * natoms
 
 	w_0 = ssfreqs.flatten() * ThzToCm
@@ -38,8 +31,6 @@ def EvaluateDOS(ssfreqs, natoms):
 
 	#Evaluate PDF in xrange. bw_method is bw; change if necessary
 	y = np.zeros(grid)
-	std = np.std(ssfreqs)
-	std2 = np.std(ssfreqs / ThzToCm)
 	bw = 5 #in wavenumbers ; this is consistent with the std / 20 that NyDay 2016 used (Just for all modes)
 	for i in np.arange(dim):
 		band = ssfreqs[i,:]
@@ -50,7 +41,7 @@ def EvaluateDOS(ssfreqs, natoms):
 
 	#Normalized Density of States 
 	y_0 = y / (np.size(x) * bw * np.sqrt(2 * np.pi))
-	
+
 	#Create plot
 	#axes = plt.gca()
 	#axes.set_xlim([xS,xL])
@@ -69,7 +60,7 @@ def EvaluateDOS(ssfreqs, natoms):
 	SvibArray = []
 
 	for temp in T:
-		thermo = therm_init.Thermo(x,temp)
+		thermo = Thermo(x,temp)
 	
 	##FVIB##	
 		Fw_0 = thermo.Helmholtz() * y_0
@@ -109,10 +100,43 @@ def EvaluateDOS(ssfreqs, natoms):
 
 		Svib = 3 * R * Svib * natoms # // Fultz 2009
 		SvibArray = np.append(SvibArray, Svib)
-	AllData = pd.DataFrame({'Temperature': np.array(T),
-                                    'Hvib': np.array(HvibArray),
-                                    'Svib': np.array(SvibArray),
-                                    'Fvib': np.array(FvibArray)})
-	#print(AllData)
+
+	#AllData = pd.DataFrame({'Temperature': np.array(T),
+                                    #'Hvib': np.array(HvibArray),
+                                    #'Svib': np.array(SvibArray),
+                                    #'Fvib': np.array(FvibArray)})
+
 
 	return FvibArray, HvibArray, SvibArray, T
+
+class Thermo:
+	def __init__(self, x, temp):
+		self.T = temp
+		self.h = 6.62607363e-34
+		self.Na = 6.0221367e23
+		self.kb = 1.3806488e-23
+		self.c = 2.99792458e8
+		self.w = x * (self.c * 100)
+	def Helmholtz(self):
+		if self.T == 0:
+			F_fun = self.w * self.h / 2
+		else:
+			F_fun = self.kb * self.T * np.log(2*np.sinh(self.h * self.w / (2 * self.kb * self.T)))
+		return F_fun
+
+	def Enthalpy(self):
+		if self.T == 0:
+			H_fun = self.w * self.h / 2
+		else:
+			H_fun = self.h / 2 * self.w * (np.cosh(self.h * self.w / (2 * self.kb * self.T)) / np.sinh(self.h * self.w / (2 * self.kb * self.T)))
+		return H_fun
+
+	def Entropy(self):
+		eps = self.w * self.h #DOS in energy
+		occ = 1 / (np.exp(eps / (self.kb * self.T)) - 1 ) #Planck Distribution // Fultz 2009
+		S_fun = (occ + 1) * np.log(occ + 1) - occ * np.log(occ) #Svib for phonons
+		return S_fun
+
+	def HeatCap(self):
+		Cv_fun = self.kb * np.square((self.h * self.w / (2 * self.kb * self.T))) * np.square(1 / (np.sinh(self.h * self.w / (2 * self.kb * self.T))))
+		return Cv_fun

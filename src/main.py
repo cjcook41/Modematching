@@ -2,10 +2,6 @@ import ReadData as data
 import JobControl 
 import numpy as np
 
-#File input name
-#inp = input("Input file name: \t")
-
-
 #Job description 
 job_description = data.ReadIFile("infile") #Chnge this when im done(?)
 job_params = job_description.get_data()
@@ -25,7 +21,7 @@ if P2atom_IDs == 0:
 	natoms = sum(P1atom_IDs)
 	dim = 3 * natoms
 	poly1 = struct_IDs[0].rstrip()
-	#print(poly1)
+
 else:
 	PhaseTrans = True
 	print('Multiple structures. Predicting Phase Transition...')
@@ -56,8 +52,6 @@ if PhaseTrans == False:
 		NewAcoustics = P1Control.Dispersion(AllConstants)
 		ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
 
-		#print('Need EC as an input; implement this')
-
 	#Now we have the shifted freqs...
 	if P1Count == 1:
 		print("One structure, no QHA")
@@ -72,7 +66,8 @@ if PhaseTrans == False:
 		ThermoData = P1Control.QuasiHarmonic(ShiftedFreqs,p1freq_vols,Press)
 	filename = poly1 + '.csv'
 	ThermoData.to_csv(filename,index=False)
-		
+	print('JOB SUCCESSFUL!!')
+
 else:
 	##FIRST STRUCTURE
 	P1Control = JobControl.Control(poly1, P1Count, P1atom_IDs)
@@ -85,9 +80,13 @@ else:
 	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
 		ShiftedFreqs = P1Control.Modematch()
 
-	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		print('Need EC as an input; implement this')
+	#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
+	#	print('Need EC as an input; implement this')
 
+	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
+		AllConstants = P1Control.ReadECs()
+		NewAcoustics = P1Control.Dispersion(AllConstants)
+		ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
 	#Now we have the shifted freqs...
 	if P1Count == 1:
 		P1CheckQHA = False
@@ -110,7 +109,6 @@ else:
 	P2Control = JobControl.Control(poly2, P2Count, P2atom_IDs)
 	P2Control.MakePaths()
 
-
 	#Check to see if we're calculating new acoustics / ECs
 	if acoustic_ID[0].lower() == 'true' and acoustic_ID[1].lower() == 'true':
 		AllConstants = P2Control.SolveECs()
@@ -120,8 +118,13 @@ else:
 	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
 		ShiftedFreqs = P2Control.Modematch()
 
+	#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
+	#	print('Need EC as an input; implement this')
+
 	elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		print('Need EC as an input; implement this')
+		AllConstants = P1Control.ReadECs()
+		NewAcoustics = P1Control.Dispersion(AllConstants)
+		ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
 
 	#Now we have the shifted freqs...
 	if P2Count == 1:
@@ -146,6 +149,5 @@ else:
 		PhaseTransData = P1Control.PhaseTransControl(P1ThermoData,P2ThermoData,Press)
 		filename = 'Phase_Transition'
 		PhaseTransData.to_csv(filename,index=False)
+
 	print('JOB SUCCESSFUL!!')
-	
-		

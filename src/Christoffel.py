@@ -6,7 +6,6 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		bohr2ang = 0.529177 ## YAML files start in bohr
 		ss_params = data.ReadYaml(SSFreqFile)
 		[ss_freqs, mesh] = ss_params.get_SS()
-
 		lattice = lattice.reshape([3,3]) * bohr2ang
 
 		##IN ANGSTROM
@@ -85,7 +84,6 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			Christoffel_Mat[2,2] = A_3
 			
 			PhaseVelocity = np.linalg.eig(Christoffel_Mat)[0] # = pv^2
-
 			kzb_vec = np.linalg.norm(kpt_sampling_directions[i,:] * lattice)
 			kzb = (np.pi / (kzb_vec * 1E-10))
 
@@ -95,12 +93,10 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			nan_ind = np.isnan(PhaseVelocity)
 			PhaseVelocity[nan_ind] = 0
 
-			
 			Coeff = 2 * PhaseVelocity * kzb / np.pi
 			Coeff = Coeff / THz * wvnum
 			Wmax = np.append(Wmax,Coeff)
-			
-			
+
 		Wmax = Wmax.reshape([-1,3])
 		a_Wmax = np.average(Wmax[:,0])
 		b_Wmax = np.average(Wmax[:,1])
@@ -108,9 +104,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 
 		avg_Wmax = np.array([a_Wmax, b_Wmax, c_Wmax])
 
-
 		#Assign kpt direction in mesh sampling + Smoothing of the bands at kpt boundaries
-
 		all_ids = []
 		for i in range(np.size(mesh[:,0]) - 1):
 			x1 = mesh[i,:]
@@ -140,22 +134,17 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		all_ids = np.append(all_ids, all_ids[-1])
 		TotKpts = np.size(all_ids)
 
-		#mesh = ss_params.get_kpts() #Mesh gets overwritten for some reason ???? Have to recreate it
 		[ss_freqs, mesh] = ss_params.get_SS()
 		ss_freqs = np.reshape(ss_freqs,(-1, dim))
 		DispFreqs = []
+
 		for i in range(TotKpts):
 			x1 = mesh[i,:]
 			dir_id = int(all_ids[i])
-			#print(kpt_sampling_directions[dir_id,:])
-			#print(np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:]))
-			
 			y = avg_Wmax * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])) * np.pi / 2))
-
 			DispFreqs = np.append(DispFreqs,y)
 
 		DispFreqs = DispFreqs.reshape([-1,3])
-		#print(DispFreqs / wvnum)
 		ss_freqs[:,0] = DispFreqs[:,0] / wvnum
 		ss_freqs[:,1] = DispFreqs[:,1] / wvnum
 		ss_freqs[:,2] = DispFreqs[:,2] / wvnum

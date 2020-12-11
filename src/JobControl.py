@@ -132,10 +132,11 @@ class Control:
 			ECFileOut = XtalPath + os.path.sep + x + os.path.sep + self.xtal + x + '.ecs'
 
 			try:
-				os.rename(ECFile, ECFileOut)
-			except FileExistsError:
+				copyfile(ECFile,ECFileOut)
 				os.remove(ECFile)
-				os.rename(ECFile, ECFileOut)
+			except OSError as e:
+				print('Cannot Find file %s' % e)
+				continue
 
 			file = open(ECFileOut, "r")
 			ECs = []
