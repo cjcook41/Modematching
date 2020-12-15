@@ -13,7 +13,7 @@ alpha
 
 \$acoustics
 Christoffel true
-EC False
+EC false
 \*
 
 \$P1volumes

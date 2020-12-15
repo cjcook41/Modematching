@@ -1,6 +1,4 @@
-#Modematch script PYTHON VER
-
-import ReadData as data 
+import ReadData as data
 import numpy as np
 import warnings 
 
@@ -29,16 +27,11 @@ def get_match(dim, dotprods):
 
 def Match(atom_ID,ss_freqs,RefFile,ShiftFile):
 	warnings.filterwarnings("ignore")
-	convert_thz = 33.35641
 
 	#All Atom Info
 	natoms = sum(atom_ID)
 	dim = natoms * 3
-	
-	#Supercell_Params = data.ReadYaml(SSFile)
-	#[ss_freqs, mesh] = Supercell_Params.get_SS()
 	ss_freqs = np.reshape(ss_freqs,(-1,dim))
-
 
 	Ref_UCParams = data.ReadYaml(RefFile)
 	[ref_freqs, ref_vecs] = Ref_UCParams.get_UC()
@@ -54,7 +47,6 @@ def Match(atom_ID,ss_freqs,RefFile,ShiftFile):
 
 	seen = set()
 	uniq = []
-
 	#Loops until no diplicate matches are found
 	for i in match_array:
 		if i not in seen:

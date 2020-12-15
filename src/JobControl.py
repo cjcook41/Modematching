@@ -1,11 +1,15 @@
-import modematch
-import numpy as np
-import ElasticConstants as ECs
-import ReadData as data
-import GetDOS as dos
-import qha2
-import Christoffel
 import os
+
+import numpy as np
+from shutil import copyfile
+
+import Christoffel
+import ElasticConstants as ECs
+import GetDOS as dos
+import ReadData as data
+import modematch
+import qha2
+
 
 class Control:
 	def __init__(self,x,c,a):
@@ -15,15 +19,15 @@ class Control:
 	def Modematch(self):
 		print("Shifting ", self.xtal, " Frequencies...")
 		CurrentDir = os.getcwd()
-		XtalPath = CurrentDir + '/' + self.xtal + '/'
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		AllFreqs = []
 		for x in range(self.count):
 			x = str(x+1)
 			SubDir = XtalPath + x
 			
-			SSFreqFile = SubDir + '/' + self.xtal + x + '.ss.yaml'
-			RefFreqFile = SubDir + '/' + self.xtal + x  + '.ref.yaml'
-			ShiftFreqFile = SubDir + '/' + self.xtal + x + '.shift.yaml'
+			SSFreqFile = SubDir + os.path.sep + self.xtal + x + '.ss.yaml'
+			RefFreqFile = SubDir + os.path.sep + self.xtal + x + '.ref.yaml'
+			ShiftFreqFile = SubDir + os.path.sep + self.xtal + x + '.shift.yaml'
 
 			Supercell_Params = data.ReadYaml(SSFreqFile)
 			[ss_freqs, mesh] = Supercell_Params.get_SS()
@@ -33,20 +37,24 @@ class Control:
 			AllFreqs = np.append(AllFreqs, shifted_freqs)
 		
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
-		return AllFreqs
+		return AllFreqs, mesh
 		
 	def MakePaths(self):
 		CurrentDir = os.getcwd()
-		XtalPath = CurrentDir + '/' + self.xtal + '/'
+		RawfileDir = CurrentDir + os.path.sep + 'datafiles' + os.path.sep
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		if not os.path.exists(XtalPath):
 			os.mkdir(XtalPath)
-		for file in os.listdir(CurrentDir):	
+		for file in os.listdir(RawfileDir):
 			if file.startswith(self.xtal):
 				try:
-					os.rename(file, XtalPath + file)
-				except OSError:
+					source = RawfileDir + file
+					target = XtalPath + file
+					copyfile(source, target)
+				except OSError as e:
+					print('No File %s' % e)
 					continue
-		FileNames = []
+
 		for x in range(self.count):
 			x = str(x+1)
 			SubDir = XtalPath + x
@@ -55,29 +63,54 @@ class Control:
 			SSFreqFile = XtalPath + self.xtal + x + '.ss.yaml'
 			RefFreqFile = XtalPath + self.xtal + x + '.ref.yaml'
 			ShiftFreqFile = XtalPath + self.xtal + x + '.shift.yaml'
-			StrainFile = XtalPath + self.xtal + x + '.strains'
+			StrainFile = XtalPath + self.xtal + '.strains'
 			StressFile = XtalPath + self.xtal + x + '.stresses'
-			LattFile = XtalPath + self.xtal + x + '.lattice'
 
-			os.rename(SSFreqFile, SubDir + '/' + self.xtal + x + '.ss.yaml')
-			os.rename(RefFreqFile, SubDir + '/' + self.xtal + x + '.ref.yaml')
-			os.rename(ShiftFreqFile, SubDir + '/' + self.xtal + x + '.shift.yaml')
-			os.rename(StrainFile, SubDir + '/' + self.xtal + x + '.strains')
-			os.rename(StressFile, SubDir + '/' + self.xtal + x + '.stresses')
-			os.rename(LattFile, SubDir + '/' + self.xtal + x + '.lattice')
+			SSFreqFileOut = SubDir + os.path.sep + self.xtal + x + '.ss.yaml'
+			RefFreqFileOut = SubDir + os.path.sep + self.xtal + x + '.ref.yaml'
+			ShiftFreqFileOut = SubDir + os.path.sep + self.xtal + x + '.shift.yaml'
+			StrainFileOut = SubDir + os.path.sep + self.xtal + '.strains'
+			StressFileOut = SubDir + os.path.sep + self.xtal + x + '.stresses'
 
+			try:
+				copyfile(StrainFile,StrainFileOut)
+			except OSError as e:
+				print('Cannot Find file %s' % e)
+				continue
+			try:
+				os.rename(SSFreqFile, SSFreqFileOut)
+			except FileExistsError:
+				os.remove(SSFreqFileOut)
+				os.rename(SSFreqFile, SSFreqFileOut)
 
-	
+			try:
+				os.rename(RefFreqFile, RefFreqFileOut)
+			except FileExistsError:
+				os.remove(RefFreqFileOut)
+				os.rename(RefFreqFile, RefFreqFileOut)
+
+			try:
+				os.rename(ShiftFreqFile, ShiftFreqFileOut)
+			except FileExistsError:
+				os.remove(ShiftFreqFileOut)
+				os.rename(ShiftFreqFile, ShiftFreqFileOut)
+
+			try:
+				os.rename(StressFile, StressFileOut)
+			except FileExistsError:
+				os.remove(StressFileOut)
+				os.rename(StressFile, StressFileOut)
+
 	def SolveECs(self):
 		print("Solving ", self.xtal, " Elastic Constants...")
-		CurrentDir = os.getcwd()
-		XtalPath = CurrentDir + '/' + self.xtal + '/'
+		CurrentDir = os.getcwd() #+ os.path.sep + 'datafiles'
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		AllConstants = []
 		for x in range(self.count):
 			x = str(x + 1)
 			SubDir = XtalPath + x
-			StrainFile = SubDir + '/' + self.xtal + x + '.strains'
-			StressFile = SubDir + '/' + self.xtal + x + '.stresses'
+			StrainFile = SubDir + os.path.sep + self.xtal + '.strains'
+			StressFile = SubDir + os.path.sep + self.xtal + x + '.stresses'
 				
 			EC_Matrix = ECs.ElasticConstants(StressFile,StrainFile)
 			EC_Matrix = EC_Matrix.flatten()
@@ -85,20 +118,50 @@ class Control:
 	
 		AllConstants = np.reshape(AllConstants, (self.count,-1))
 		return AllConstants
-	
+
+	def ReadECs(self):
+		print("Found Elastic constants, solving dispersion...")
+		CurrentDir = os.getcwd()
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
+		AllConstants = []
+
+		for x in range(self.count):
+			x = str(x + 1)
+
+			ECFile = XtalPath + self.xtal + x + '.ecs'
+			ECFileOut = XtalPath + os.path.sep + x + os.path.sep + self.xtal + x + '.ecs'
+
+			try:
+				copyfile(ECFile,ECFileOut)
+				os.remove(ECFile)
+			except OSError as e:
+				print('Cannot Find file %s' % e)
+				continue
+
+			file = open(ECFileOut, "r")
+			ECs = []
+			for line in file:
+				ECs = np.append(ECs, np.double(line.split()))
+			AllConstants = np.append(AllConstants,ECs)
+		AllConstants = AllConstants.reshape([self.count,-1])
+		return AllConstants
+
+
+
 	def Dispersion(self,ECs):
 		CurrentDir = os.getcwd()
-		XtalPath = CurrentDir + '/' + self.xtal + '/'
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		AllFreqs = []
 		for x in range(self.count):	
 			y = str(x + 1)
 			SubDir = XtalPath + y
-			LattFile = SubDir + '/' + self.xtal + y + '.lattice'
-			SSFreqFile = SubDir + '/' + self.xtal + y + '.ss.yaml'
 
-			#InputFreqs = self.AllFreqs[x]
+			SSFreqFile = SubDir + os.path.sep + self.xtal + y + '.ss.yaml'
+			Supercell_Params = data.ReadYaml(SSFreqFile)
+			lattice = Supercell_Params.get_lattice()
+
 			InputECs = ECs[x]
-			NewFreqs = Christoffel.ECAcoustics(self.atoms,SSFreqFile,InputECs,LattFile)
+			NewFreqs = Christoffel.ECAcoustics(self.atoms,SSFreqFile,InputECs,lattice)
 			AllFreqs = np.append(AllFreqs, NewFreqs)
 		
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
@@ -106,24 +169,25 @@ class Control:
 
 	def ShiftPlusECs(self,Freqs):
 		print("Shift + EC Correction...")
-		CurrentDir = os.getcwd()
-		XtalPath = CurrentDir + '/' + self.xtal + '/'
+		CurrentDir = os.getcwd()  #+ os.path.sep + 'datafiles'
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		AllFreqs = []
 		for x in range(self.count):
 			y = str(x + 1)
 			SubDir = XtalPath + y
-			RefFreqFile = SubDir + '/' + self.xtal + y  + '.ref.yaml'
-			ShiftFreqFile = SubDir + '/' + self.xtal + y + '.shift.yaml'
+			RefFreqFile = SubDir + os.path.sep + self.xtal + y  + '.ref.yaml'
+			ShiftFreqFile = SubDir + os.path.sep + self.xtal + y + '.shift.yaml'
 
 			ss_freqs = Freqs[x,:]
 			NewFreqs = modematch.Match(self.atoms,ss_freqs,RefFreqFile,ShiftFreqFile)
 			AllFreqs = np.append(AllFreqs, NewFreqs)
+
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
 		return AllFreqs
 
 	def QuasiHarmonic(self,Freqs,Vols,Press):
 		CurrentDir = os.getcwd()
-		XtalPath = CurrentDir + '/' + self.xtal + '/'
+		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		CurveFile = XtalPath + self.xtal + '.dat'
 		EVParams = data.Quasiharmonic(CurveFile)
 		ev_data = EVParams.get_evcurve()

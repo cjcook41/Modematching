@@ -78,6 +78,20 @@ class ReadIFile:
 class ReadYaml:
 	def __init__(self, f):
 		self.infile = f
+	def get_lattice(self):
+		file = open(self.infile, "r")
+		LattTag = 'lattice:'
+		for line in file:
+			if line.rstrip()== LattTag:
+				latt = (list(islice(file,0,3)))
+				break
+		lattice = []
+		for i in range(np.size(latt)):
+			tmp = (latt[i].replace('- [','').replace(',','').replace(']','')).split()
+			tmp = np.double(tmp[0:3])
+			lattice = np.append(lattice,tmp)
+		return lattice
+
 	def get_SS(self):
 		file = open(self.infile, "r")
 		FreqTag = 'frequency:'
@@ -193,4 +207,4 @@ class Quasiharmonic:
         ev_data = np.fromstring(ev_data, dtype = np.float, sep = '\n')
         ev_data = np.reshape(ev_data,(-1,2))
         return ev_data
-	
+

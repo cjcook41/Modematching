@@ -9,17 +9,17 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 	natoms = sum(natoms)
 	dim = 3 * natoms
 	AllFreqs = AllFreqs.transpose()
+
 #Curve Data
 	Volumes = ev_curve[:,0]
 	Energies = ev_curve[:,1]
 	Vmin = min(Volumes)
 	Vmax = max(Volumes)
 
-
 	TArray = []	
 	OptVolArray = []
 	OptGibbsArray = []
-	OptFvibArray = []
+	OptFvibArray = [] 
 	OptSvibArray = []
 	OptHvibArray = []
 	OptElArray = []
@@ -31,7 +31,6 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 
 	for i in range(np.size(AllFreqs,1)):
 		freqset = np.array(AllFreqs[:,i]).reshape(-1,dim)
-		#freqset = np.transpose(freqset)
 		[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(freqset,natoms)
 		print('Done with frequency set', i)
 		FvibAll = np.append(FvibAll, Fvib)
@@ -40,51 +39,36 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 		TAll = np.append(TAll, T)
 
 	ThermoDim = np.int(np.size(FvibAll)/count)
-
 	FvibAll = np.array(FvibAll).reshape(-1,ThermoDim)
 	HvibAll = np.array(HvibAll).reshape(-1,ThermoDim)
 	SvibAll = np.array(SvibAll).reshape(-1,ThermoDim)
 	TAll = np.array(TAll).reshape(-1,ThermoDim)
-	
 	print('Starting pressure scan...')
 
 	for P in Press:
-
 	#Loop over all T's evaluatied in Thermo (Columns in FvibAll)
 		for i in range(ThermoDim):
-			#print(FreqVols, FvibAll[:,i])
 			F_polyfit = np.polyfit(FreqVols, FvibAll[:,i], 2)
 			H_polyfit = np.polyfit(FreqVols, HvibAll[:,i], 2)
 			S_polyfit = np.polyfit(FreqVols, SvibAll[:,i], 2)
 			PolyFvibFunction = np.polyval(F_polyfit,Volumes)
-			PolyHvibFunction = np.polyval(H_polyfit,Volumes)
-			PolySvibFunction = np.polyval(S_polyfit,Volumes)
 			PV = P * Volumes * 1.0e-24 * Na
 			Gibbs = PolyFvibFunction + Energies + PV
 			G_polyfit = np.polyfit(Volumes,Gibbs,4)
-
 
 		# EP CHECKER Don't allow the minimum to be on the endpoints
 			MinIndex = np.argmin(Gibbs)
 			if Volumes[MinIndex] == Volumes[-1]:
 				MinIndex = MinIndex - 1
-				Gmin_Volume = Volumes[MinIndex]
-				Gmin = Gibbs[MinIndex]
 			elif Volumes[MinIndex] == Volumes[0]:
 				MinIndex = MinIndex + 1
-				Gmin_Volume = Volumes[MinIndex]
-			else:
-				Gmin_Volume = Volumes[MinIndex]	
-		
+
 		#Define initial Gibbs curve \\ G(V) 
 			def PolyGFxn(V):
 				return np.polyval(G_polyfit,V)
 		
 			minimum = optimize.brent(PolyGFxn) #Provides initial Vmin and Gmin for Murnaghan Fit
 			minGibbs = PolyGFxn(minimum)
-
-		#print("Raw: ", minimum,"\t",minGibbs, "\t", TAll[1,i])
-
 
 		#Murnaghan EOS \\ Check parentheses
 			def Murnaghan(x,c0,c1):
@@ -151,10 +135,6 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			Exp[:,0] = VolExp
 			Exp[:,1] = minimum
 			Exp[:,2] = minGibbs
-		
-		#Initial Guess
-			y_Exp = Murnaghan(Exp,a[0],a[1])
-			y_Comp = Murnaghan(Comp,a[0],a[1])
 
 		#Optimize parameters
 			Exp_coeffs = optimize.curve_fit(Murnaghan,Exp, GibbsExp,a)[0]
@@ -165,7 +145,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			OptimalFvib = np.polyval(F_polyfit,OptimalVolume[0])
 			OptimalSvib = np.polyval(S_polyfit,OptimalVolume[0])
 			OptimalHvib = np.polyval(H_polyfit,OptimalVolume[0])
-			OptimalPV = P * OptimalVolume * 1E-24 * Na 
+			#OptimalPV = P * OptimalVolume * 1E-24 * Na
 			OptimalEl = OptimalGibbs - OptimalFvib # - OptimalPV
 
 			TArray = np.append(TArray,TAll[1,i])
@@ -228,6 +208,7 @@ def PhaseTrans(AllData1,AllData2,Press):
 								 'H_Trans': np.array(H_Trans_Array),
 								 'S_Trans': np.array(S_Trans_Array),
 								 'Pressure': Press })
+
 	print(Phase_Trans_Data)
 	return Phase_Trans_Data
 
