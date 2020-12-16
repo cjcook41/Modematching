@@ -16,3 +16,10 @@ This program will also allow for the inclusion of multiple sets of frequencies f
 
 ##
 Finally, ModeMatch can predict solid-state phase diagrams given multiple structures in the working directory. Simply identify multiple polymorphs by listing more structures in the infile inder $/Structures, and name the input files accordingly. 
+
+### Running the Code
+The code requires 2 things in the working directory:
+1. Input file titled `infile` containing job control
+2. Directory titled `datafiles` containing all of the necessary data files for the job you're running. More on this in the **Input File** section. 
+
+### Input File
