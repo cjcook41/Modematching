@@ -17,13 +17,23 @@ This program will also allow for the inclusion of multiple sets of frequencies f
 
 Finally, ModeMatch can predict solid-state phase diagrams given multiple structures in the working directory. Identify multiple polymorphs by listing more structures in the infile inder $/Structures, and name the input files accordingly.
 
-### Installation
+## Installation
+
+### Dependencies
+numpy (>= 1.18.1)
+sympy (>= 1.5.1)
+pandas (>=1.0.1)
+
+### From pip
 Modematch can be installed via pip:
 
 `pip install BLAH`
 
+### From source
 
-### Running the Code
+`git clone https://github.com/cjcook41/Modematching.git`
+
+## Running the Code
 The code requires 2 things in the working directory:
 1. Input file titled `infile` containing job control
 2. Directory titled `datafiles` containing all of the necessary data files for the job you're running. More on this in the **Input File** section. 
