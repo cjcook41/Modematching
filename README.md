@@ -1,10 +1,8 @@
 # Modematching
 Phonon normal mode-matching algorithm used for upscaling low-accuracy semi-empirical (DFTB) phonons to full ab initio (DFT)
+
 <p align="center">
-  <img src="https://github.com/cjcook41/Modematching/blob/cjcook41-patch-3/images/CO2_olap.pdf">
-</p>
-<p align="center">
-  <img src="https://github.com/cjcook41/Modematching/blob/cjcook41-patch-3/images/alphaODH_DOS_overlays.pdf">
+  <img src="https://github.com/cjcook41/Modematching/blob/cjcook41-patch-3/images/GitFig1.png">
 </p>
 
 This code contains a full suite of finite temperature free energy predictions based on pre-calculated harmonic phonons. 
@@ -19,6 +17,10 @@ This program will also allow for the inclusion of multiple sets of frequencies f
 
 Finally, ModeMatch can predict solid-state phase diagrams given multiple structures in the working directory. Identify multiple polymorphs by listing more structures in the infile inder $/Structures, and name the input files accordingly.
 
+### Installation
+Modematch can be installed via pip:
+
+`pip install BLAH`
 
 
 ### Running the Code
