@@ -25,7 +25,11 @@ Finally, ModeMatch can predict solid-state phase diagrams given multiple structu
 * pandas (>=1.0.1)
 
 ### From pip
-Modematch can be installed via pip:
+First, it is recommended that a virtual environment is created for module control, e.g.:
+
+`conda create -n modematch`
+
+Modematch can then be installed via pip:
 
 `pip install modematch==0.0.1`
 
