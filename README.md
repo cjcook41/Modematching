@@ -20,9 +20,9 @@ Finally, ModeMatch can predict solid-state phase diagrams given multiple structu
 ## Installation
 
 ### Dependencies
-numpy (>= 1.18.1)
-sympy (>= 1.5.1)
-pandas (>=1.0.1)
+* numpy (>= 1.18.1)
+* sympy (>= 1.5.1)
+* pandas (>=1.0.1)
 
 ### From pip
 Modematch can be installed via pip:
