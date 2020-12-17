@@ -56,3 +56,13 @@ Volume dependent free energies are evaluated at a series of pressures (0 - 1 GPa
 `infile` is a sample input file for Phase I carbon dioxide. This input file will perform the base normal mode shift, evaluate free energies at multiple volumes of an Alpha `xtal`, evaluate the corrected acoustic modes using pre-calculated elastic constants, and finally perform the quasiharmonic approximation for thermal expansion. 
 
 
+### Outputs
+1. For 1 polymorph, 1 volume (No QHA):
+* Thermodynamic data / absolulte free energies
+
+2. 1 polymorph, multiple volumes (QHA):
+* `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
+
+3. 2 polymorphs, multiple volumes (QHA + Phase Diagram):
+* `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
+* PhaseDiagram file containing temperatures, enthalpies, and entropies of transition as a function of P
