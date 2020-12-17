@@ -27,7 +27,7 @@ Finally, ModeMatch can predict solid-state phase diagrams given multiple structu
 ### From pip
 Modematch can be installed via pip:
 
-`pip install BLAH`
+`pip install modematch==0.0.1`
 
 ### From source
 
@@ -37,7 +37,18 @@ Modematch can be installed via pip:
 The code requires 2 things in the working directory:
 1. Input file titled `infile` containing job control
 2. Directory titled `datafiles` containing all of the necessary data files for the job you're running. More on this in the **Input File** section. 
+3. Run the following commands from a python3 interpreter:
+* `from modematch import main'
+* `main.RunJob()`
+
+### Elastic Properties
+Control of elastic calcualations is listed under the `\$acoustics` card. `Christoffel true` will correct raw frequencies using elastic constants and Christoffel matrices. `EC true` will evaluate the elastic constants on the fly using input stresses and strains.  
+
+### Phase Diagrams
+For phase diagrams, add another polymorph name under the `\$crystals` card. **NOTE**: The names listed under here will need to be the prefix of the input data files! `\$P2atoms` and `\$P2volumes` will need to be specified as well, containing atomic information and cell volumes of the second polymorph specified. 
+Volume dependent free energies are evaluated at a series of pressures (0 - 1 GPa) and temperatures (0 - 1000K), and third order polynomial fits are used to determine the transition temperature at some pressure (where relative thermodynamic stability inverts). "No tranition" will result in imaginary temperatures. 
 
 ### Sample Input File
-`infile` is a sample input file for the alpha and beta polymorphs of resorcinol. This input file will perform the base normal mode shift, evaluate free energies at multiple volumes of an Alpha and Beta `xtal`, solve for Elastic Constants and correct acoustic modes, and finally perform the quasiharmonic approximation for thermal expansion and phase diagrams. 
+`infile` is a sample input file for Phase I carbon dioxide. This input file will perform the base normal mode shift, evaluate free energies at multiple volumes of an Alpha `xtal`, evaluate the corrected acoustic modes using pre-calculated elastic constants, and finally perform the quasiharmonic approximation for thermal expansion. 
+
 
