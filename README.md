@@ -69,6 +69,6 @@ Volume dependent free energies are evaluated at a series of pressures (0 - 1 GPa
   * PhaseDiagram file containing temperatures, enthalpies, and entropies of transition as a function of P
   
   
-  ## Citation
-  Please refer to the following publications for more information and citation:
-  * https://doi.org/10.1063/5.0032649
+## Citation
+Please refer to the following publications for more information and citation:
+* https://doi.org/10.1063/5.0032649
