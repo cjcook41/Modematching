@@ -41,8 +41,9 @@ Modematch can then be installed via pip:
 The code requires 2 things in the working directory:
 1. Input file titled `infile` containing job control
 2. Directory titled `datafiles` containing all of the necessary data files for the job you're running. More on this in the **Input File** section. 
-3. Run the following commands from a python3 interpreter:
-* `from modematch import main'
+
+Run the following commands from a python3 interpreter:
+* `from modematch import main`
 * `main.RunJob()`
 
 ### Elastic Properties
@@ -57,12 +58,12 @@ Volume dependent free energies are evaluated at a series of pressures (0 - 1 GPa
 
 
 ### Outputs
-1. For 1 polymorph, 1 volume (No QHA):
-* Thermodynamic data / absolulte free energies
+* For 1 polymorph, 1 volume (No QHA):
+  * Thermodynamic data / absolulte free energies
 
-2. 1 polymorph, multiple volumes (QHA):
-* `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
+* 1 polymorph, multiple volumes (QHA):
+  * `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
 
-3. 2 polymorphs, multiple volumes (QHA + Phase Diagram):
-* `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
-* PhaseDiagram file containing temperatures, enthalpies, and entropies of transition as a function of P
+* 2 polymorphs, multiple volumes (QHA + Phase Diagram):
+  * `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
+  * PhaseDiagram file containing temperatures, enthalpies, and entropies of transition as a function of P
