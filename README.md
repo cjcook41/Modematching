@@ -31,7 +31,7 @@ First, it is recommended that a virtual environment is created for module contro
 
 Modematch can then be installed via pip:
 
-`pip install modematch==0.0.1`
+`pip install modematch==0.0.4`
 
 ### From source
 
