@@ -111,8 +111,9 @@ class Control:
 			SubDir = XtalPath + x
 			StrainFile = SubDir + os.path.sep + self.xtal + '.strains'
 			StressFile = SubDir + os.path.sep + self.xtal + x + '.stresses'
-				
 			EC_Matrix = ECs.ElasticConstants(StressFile,StrainFile)
+			ECFile = XtalPath + self.xtal + x + '.ecs'
+			np.savetxt(ECFile, EC_Matrix, delimiter='\t')
 			EC_Matrix = EC_Matrix.flatten()
 			AllConstants = np.append(AllConstants, EC_Matrix)
 	

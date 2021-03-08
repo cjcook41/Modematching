@@ -98,9 +98,17 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			Wmax = np.append(Wmax,Coeff)
 
 		Wmax = Wmax.reshape([-1,3])
-		a_Wmax = np.average(Wmax[:,0])
-		b_Wmax = np.average(Wmax[:,1])
-		c_Wmax = np.average(Wmax[:,2])
+		a_Wmax = Wmax[:,0]
+		b_Wmax = Wmax[:,1]
+		c_Wmax = Wmax[:,2] 
+
+		a_Wmax = a_Wmax[a_Wmax!=0]
+		b_Wmax = b_Wmax[b_Wmax!=0]
+		c_Wmax = c_Wmax[c_Wmax!=0]
+
+		a_Wmax = np.average(a_Wmax)
+		b_Wmax = np.average(b_Wmax)
+		c_Wmax = np.average(c_Wmax)
 
 		avg_Wmax = np.array([a_Wmax, b_Wmax, c_Wmax])
 

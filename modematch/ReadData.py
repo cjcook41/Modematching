@@ -36,6 +36,8 @@ class ReadIFile:
 					p1vol_list = np.append(p1vol_list,line)
 				elif Label == 'P2Volumes'.lower():
 					p2vol_list = np.append(p2vol_list,line)
+				elif Label == 'Pmax'.lower():
+					Pmax = float(line)
 				elif Label == 'Blank':
 					continue
 		file.close()
@@ -73,7 +75,7 @@ class ReadIFile:
 			P2atom_array = AtomIDS(P2atom_list)	
 		acoustic_job = AcousticJobID(acoustic_list)
 	
-		return P1atom_array, P2atom_array, xtal_list, acoustic_job, p1vol_list, p2vol_list
+		return P1atom_array, P2atom_array, xtal_list, acoustic_job, p1vol_list, p2vol_list, Pmax
 
 class ReadYaml:
 	def __init__(self, f):
