@@ -31,11 +31,17 @@ First, it is recommended that a virtual environment is created for module contro
 
 Modematch can then be installed via pip:
 
+`conda activate modematch`
 `pip install modematch==0.0.4`
+
 
 ### From source
 
 `git clone https://github.com/cjcook41/Modematching.git`
+`conda activate modematch`
+`python setup.py sdist`
+`pip install modematch/modematch-0.0.4.tar.gz/`
+
 
 ## Running the Code
 The code requires 2 things in the working directory:
@@ -51,7 +57,7 @@ Control of elastic calcualations is listed under the `\$acoustics` card. `Christ
 
 ### Phase Diagrams
 For phase diagrams, add another polymorph name under the `\$crystals` card. **NOTE**: The names listed under here will need to be the prefix of the input data files! `\$P2atoms` and `\$P2volumes` will need to be specified as well, containing atomic information and cell volumes of the second polymorph specified. 
-Volume dependent free energies are evaluated at a series of pressures (0 - 1 GPa) and temperatures (0 - 1000K), and third order polynomial fits are used to determine the transition temperature at some pressure (where relative thermodynamic stability inverts). "No tranition" will result in imaginary temperatures. 
+Volume dependent free energies are evaluated at a series of pressures up to `\$Pmax` in GigaPascals (0.01GPa steps),  and temperatures (0 - 500K, 10K steps), and third order polynomial fits are used to determine the transition temperature at some pressure (where relative thermodynamic stability inverts). "No tranition" will result in imaginary temperatures. 
 
 ### Sample Input File
 `infile` is a sample input file for Phase I carbon dioxide. This input file will perform the base normal mode shift, evaluate free energies at multiple volumes of an Alpha `xtal`, evaluate the corrected acoustic modes using pre-calculated elastic constants, and finally perform the quasiharmonic approximation for thermal expansion. 
