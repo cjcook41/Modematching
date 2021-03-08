@@ -3,12 +3,12 @@ import os
 import numpy as np
 from shutil import copyfile
 
-import Christoffel
-import ElasticConstants as ECs
-import GetDOS as dos
-import ReadData as data
-import modematch
-import qha2
+from . import Christoffel
+from . import ElasticConstants as ECs
+from . import GetDOS as dos
+from . import ReadData as data
+from . import modematch
+from . import qha2
 
 
 class Control:
@@ -111,8 +111,9 @@ class Control:
 			SubDir = XtalPath + x
 			StrainFile = SubDir + os.path.sep + self.xtal + '.strains'
 			StressFile = SubDir + os.path.sep + self.xtal + x + '.stresses'
-				
 			EC_Matrix = ECs.ElasticConstants(StressFile,StrainFile)
+			ECFile = XtalPath + self.xtal + x + '.ecs'
+			np.savetxt(ECFile, EC_Matrix, delimiter='\t')
 			EC_Matrix = EC_Matrix.flatten()
 			AllConstants = np.append(AllConstants, EC_Matrix)
 	

@@ -1,5 +1,5 @@
 import numpy as np
-import GetDOS as dos
+from . import GetDOS as dos
 from scipy import optimize
 import pandas as pd
 
@@ -37,12 +37,14 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 		HvibAll = np.append(HvibAll, Hvib)
 		SvibAll = np.append(SvibAll, Svib)
 		TAll = np.append(TAll, T)
+	
 
 	ThermoDim = np.int(np.size(FvibAll)/count)
 	FvibAll = np.array(FvibAll).reshape(-1,ThermoDim)
 	HvibAll = np.array(HvibAll).reshape(-1,ThermoDim)
 	SvibAll = np.array(SvibAll).reshape(-1,ThermoDim)
 	TAll = np.array(TAll).reshape(-1,ThermoDim)
+	np.savetxt("Fvibs.csv",FvibAll,delimiter=",")
 	print('Starting pressure scan...')
 
 	for P in Press:
@@ -67,8 +69,14 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			def PolyGFxn(V):
 				return np.polyval(G_polyfit,V)
 		
-			minimum = optimize.brent(PolyGFxn) #Provides initial Vmin and Gmin for Murnaghan Fit
-			minGibbs = PolyGFxn(minimum)
+			##Get initial V for minimumization
+			VGrid = np.arange(Vmin,Vmax,0.01)
+			T_fit = np.polyval(G_polyfit,VGrid)
+			initV = VGrid[np.argmin(T_fit)]
+
+			opt_params = optimize.minimize(PolyGFxn,initV) #Provides initial Vmin and Gmin for Murnaghan Fit
+			minimum = opt_params.x[0]
+			minGibbs = opt_params.fun
 
 		#Murnaghan EOS \\ Check parentheses
 			def Murnaghan(x,c0,c1):
@@ -140,17 +148,20 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			Exp_coeffs = optimize.curve_fit(Murnaghan,Exp, GibbsExp,a)[0]
 			Comp_coeffs = optimize.curve_fit(Murnaghan,Comp,GibbsComp,a)[0]
 
-			OptimalVolume = optimize.brent(DoubleMurn,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),brack=(Vmin,Vmax))
-			OptimalGibbs = DoubleMurn(OptimalVolume,minimum,minGibbs,Comp_coeffs,Exp_coeffs)
-			OptimalFvib = np.polyval(F_polyfit,OptimalVolume[0])
-			OptimalSvib = np.polyval(S_polyfit,OptimalVolume[0])
-			OptimalHvib = np.polyval(H_polyfit,OptimalVolume[0])
+			#OptimalVolume = optimize.brent(DoubleMurn,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),brack=(Vmin,Vmax))
+			#OptimalGibbs = DoubleMurn(OptimalVolume,minimum,minGibbs,Comp_coeffs,Exp_coeffs)
+			OptimalParams = optimize.minimize(DoubleMurn,minimum,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs))
+			OptimalVolume = OptimalParams.x[0]
+			OptimalGibbs = OptimalParams.fun
+			OptimalFvib = np.polyval(F_polyfit,OptimalVolume)
+			OptimalSvib = np.polyval(S_polyfit,OptimalVolume)
+			OptimalHvib = np.polyval(H_polyfit,OptimalVolume)
 			#OptimalPV = P * OptimalVolume * 1E-24 * Na
 			OptimalEl = OptimalGibbs - OptimalFvib # - OptimalPV
 
 			TArray = np.append(TArray,TAll[1,i])
-			OptVolArray = np.append(OptVolArray, OptimalVolume[0])
-			OptGibbsArray = np.append(OptGibbsArray, OptimalGibbs[0])
+			OptVolArray = np.append(OptVolArray, OptimalVolume)
+			OptGibbsArray = np.append(OptGibbsArray, OptimalGibbs)
 			OptFvibArray = np.append(OptFvibArray, OptimalFvib)
 			OptSvibArray = np.append(OptSvibArray, OptimalSvib)
 			OptHvibArray = np.append(OptHvibArray, OptimalHvib)

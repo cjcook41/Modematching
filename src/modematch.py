@@ -1,4 +1,4 @@
-import ReadData as data
+from . import ReadData as data
 import numpy as np
 import warnings 
 
@@ -13,15 +13,11 @@ def get_dots(dim,shift,ref):
 	dotprods = np.transpose(dotprods)
 	return dotprods
 
-def get_match(dim, dotprods):
+def get_match(available_matches, dotprods):
 	match_array = np.array([])
-	for i in range(0, dim):
+	for i in available_matches:
 		ind_max = np.argmax(dotprods[:,i])
-		val_max = np.max(dotprods[:,i])
-		match = (ind_max,val_max)
-		match_array = np.append(match_array,match)
-	match_array = np.reshape(match_array,(dim,2))
-	match_array = match_array[:,0]
+		match_array = np.append(match_array,ind_max)
 	match_array = match_array.astype(int)
 	return match_array
 
@@ -43,26 +39,36 @@ def Match(atom_ID,ss_freqs,RefFile,ShiftFile):
 
 	#Get initial dotprod matrix
 	dotprods = get_dots(dim,shift_vecs,ref_vecs)
-	match_array = get_match(dim,dotprods)
+	available_matches = list(range(0,dim))
+	match_array = get_match(available_matches,dotprods)
 
 	seen = set()
 	uniq = []
 	#Loops until no diplicate matches are found
-	for i in match_array:
-		if i not in seen:
-			uniq.append(i)
-			seen.add(i)
+	for i in range(np.size(match_array)):
+		num = match_array[i]
+		if num not in seen:
+			available_matches.remove(num)
+			uniq.append(num)
+			seen.add(num)
 		else:
-			i = (int(i))
-			dupe_index = np.where(match_array == i)
+			olaps = []
+			dupe_index = np.where(match_array == num)
 			dupe_index = dupe_index[0][0]
-			if dotprods[i,i] > dotprods[i,dupe_index]:
-				dotprods[i,dupe_index] = 0
-			if dotprods[i,i] < dotprods[i,dupe_index]:
-				dotprods[i,i] = 0
-			else:
-				dotprods[i,dupe_index] = 0 
-			match_array = get_match(dim,dotprods)
+			if dotprods[num,dupe_index] > dotprods[num,i]:
+				dotprods[num,i] = 0
+				for j in available_matches:
+					olaps = np.append(olaps,dotprods[dupe_index,j])
+				newmatch = np.argmax(olaps)
+				newmatch = available_matches[newmatch]
+				match_array[i] = newmatch
+			if dotprods[num,dupe_index] < dotprods[num,i]:
+				dotprods[num,dupe_index] = 0
+				for j in available_matches:
+					olaps = np.append(olaps,dotprods[dupe_index,j])
+				newmatch = np.argmax(olaps)
+				newmatch = available_matches[newmatch]
+				match_array[dupe_index] = newmatch
 
 	#Set new order according to shift
 	shift_freqs = shift_freqs[match_array]
