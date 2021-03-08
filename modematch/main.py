@@ -5,6 +5,7 @@ import sys
 
 def RunJob():
 
+	print('Modematch v0.0.4')
 	#Job description
 	#IFile = str(sys.argv)
 
@@ -17,8 +18,9 @@ def RunJob():
 	acoustic_ID = job_params[3]
 	p1freq_vols = job_params[4]
 	p2freq_vols = job_params[5]
+	Pmax = job_params[6]
 
-	Press = np.arange(0,1.01,0.01)
+	Press = np.arange(0,Pmax+0.01,0.01)
 
 	if P2atom_IDs == 0:
 		PhaseTrans = False
@@ -85,7 +87,7 @@ def RunJob():
 			ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
-			ShiftedFreqs = P1Control.Modematch()
+			ShiftedFreqs = P1Control.Modematch()[0]
 
 		#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
 		#	print('Need EC as an input; implement this')
@@ -123,7 +125,7 @@ def RunJob():
 			ShiftedFreqs = P2Control.ShiftPlusECs(NewAcoustics)
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
-			ShiftedFreqs = P2Control.Modematch()
+			ShiftedFreqs = P2Control.Modematch()[0]
 
 		#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
 		#	print('Need EC as an input; implement this')

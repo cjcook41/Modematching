@@ -63,7 +63,7 @@ def ElasticConstants(stresses,strains):
 
 
 #Get range of stress/strains to fit over
-	e_range = np.arange(np.min(strains),np.max(strains) + 0.0005 ,0.0005)
+	e_range = np.arange(np.min(strains) - 0.0005,np.max(strains) + 0.0005 ,0.0005)
 	t_range1 = []
 	t_range2 = []
 	t_range3 = []
@@ -270,16 +270,21 @@ def ElasticConstants(stresses,strains):
 			#STRAIN 6
 			if tag1 == 6 and tag2 ==4:	
 				fit_x = np.append(fit_x, e_vec[1,2])
+				fit_y4 = np.append(fit_y4, t_vec[0,1])
 				fit_y5 = np.append(fit_y5, t_vec[0,2])
 				fit_y6 = np.append(fit_y6, t_vec[1,2])  
 				if len(fit_x) == 4:
+					p4 = np.polyfit(fit_x, fit_y4,2)
 					p5 = np.polyfit(fit_x, fit_y5,2)
 					p6 = np.polyfit(fit_x, fit_y6,2)
+					t_range4 = np.append(t_range4,np.polyval(p4,e_range))
 					t_range5 = np.append(t_range5,np.polyval(p5,e_range))
 					t_range6 = np.append(t_range6,np.polyval(p6,e_range))
 					for i in range(np.size(e_range,0)):
 						e_vec[1,2] = e_range[i]
 						e_vec[2,1] = e_range[i]
+						t_vec[0,1] = t_range4[i]
+						t_vec[1,0] = t_range4[i]
 						t_vec[0,2] = t_range5[i]
 						t_vec[2,0] = t_range5[i]
 						t_vec[1,2] = t_range6[i]
@@ -287,10 +292,12 @@ def ElasticConstants(stresses,strains):
 						new_stress = np.append(new_stress,t_vec)
 						new_strain = np.append(new_strain, e_vec)
 					fit_x = []
+					fit_y4 = []
 					fit_y5 = []
 					fit_y6 = []
 					e_vec = []
 					t_vec = []
+					t_range4 = []
 					t_range5 = []
 					t_range6 = []
 			t_vec = []
@@ -363,6 +370,7 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec 
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C12, C22, C23, C24, C25, C26])
+				C12_.append(ans[C12])
 				C22_.append(ans[C22])
 				C23_.append(ans[C23])
 				C24_.append(ans[C24])
@@ -380,6 +388,8 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec 
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C13, C23, C33, C34, C35, C36])
+				C13_.append(ans[C13])
+				C23_.append(ans[C23])
 				C33_.append(ans[C33])
 				C34_.append(ans[C34])
 				C35_.append(ans[C35])
@@ -396,6 +406,11 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C16, C26, C36, C46, C56, C66])
+				C16_.append(ans[C16])
+				C26_.append(ans[C26])
+				C36_.append(ans[C36])
+				C46_.append(ans[C46])
+				C56_.append(ans[C56])
 				C66_.append(ans[C66])
 				t_vec = []
 				e_vec = []
@@ -409,6 +424,10 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C15, C25, C35, C45, C55, C56])
+				C15_.append(ans[C15])
+				C25_.append(ans[C25])
+				C35_.append(ans[C35])
+				C45_.append(ans[C45])
 				C55_.append(ans[C55])
 				C56_.append(ans[C56])
 				t_vec = []
@@ -423,6 +442,9 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C14, C24, C34, C44, C45, C46])
+				C14_.append(ans[C14])
+				C24_.append(ans[C24])
+				C34_.append(ans[C34])
 				C44_.append(ans[C44])
 				C45_.append(ans[C45])
 				C46_.append(ans[C46])
@@ -494,29 +516,29 @@ def ElasticConstants(stresses,strains):
 			
 
 
-	C11 = sum(C11_) / len(C11_)
+	C11 = sum(C11_) / len(C11_) / 2
 	C12 = sum(C12_) / len(C12_)
 	C13 = sum(C13_) / len(C13_)
 	C14 = sum(C14_) / len(C14_)
 	C15 = sum(C15_) / len(C15_)
 	C16 = sum(C16_) / len(C16_)
-	C22 = sum(C22_) / len(C22_)
+	C22 = sum(C22_) / len(C22_) / 2
 	C23 = sum(C23_) / len(C23_)
 	C24 = sum(C24_) / len(C24_)
 	C25 = sum(C25_) / len(C25_)
 	C26 = sum(C26_) / len(C26_)
-	C33 = sum(C33_) / len(C33_)
+	C33 = sum(C33_) / len(C33_) / 2
 	C34 = sum(C34_) / len(C34_)
 	C35 = sum(C35_) / len(C35_)
 	C36 = sum(C36_) / len(C36_)
-	C44 = sum(C44_) / len(C44_)
+	C44 = sum(C44_) / len(C44_) / 2
 	C45 = sum(C45_) / len(C45_)
 	C46 = sum(C46_) / len(C46_)
-	C55 = sum(C55_) / len(C55_)
+	C55 = sum(C55_) / len(C55_) / 2
 	C56 = sum(C56_) / len(C56_)
-	C66 = sum(C66_) / len(C66_)
+	C66 = sum(C66_) / len(C66_) / 2
 
 	EC_matrix = np.array([[C11, C12, C13, C14, C15, C16],[C12, C22, C23, C24, C25, C26], [C13, C23, C33, C34, C35, C36],[C14, C24, C34, C44, C45, C46],[C15, C25, C35, C45, C55, C56],[C16, C26, C36, C46, C56, C66]])
-	EC_matrix = abs(EC_matrix)
+	EC_matrix = -(EC_matrix)
 
 	return EC_matrix

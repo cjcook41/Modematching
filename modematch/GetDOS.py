@@ -52,9 +52,9 @@ def EvaluateDOS(ssfreqs, natoms):
 	for i in range(np.size(x) - 1):
 		A_0 = A_0 + y_0[i] * dx
 
-	tL = 1000
+	tL = 500
 	tS = 0
-	T = np.arange(tS,tL,5)
+	T = np.arange(tS,tL,10)
 	FvibArray = []
 	HvibArray = []
 	SvibArray = []
