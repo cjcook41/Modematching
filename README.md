@@ -33,7 +33,7 @@ Modematch can then be installed via pip:
 
 `conda activate modematch`
 
-`pip install modematch==0.0.4`
+`pip install modematch`
 
 
 ### From source
