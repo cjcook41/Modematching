@@ -131,9 +131,9 @@ def RunJob():
 		#	print('Need EC as an input; implement this')
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-			AllConstants = P1Control.ReadECs()
-			NewAcoustics = P1Control.Dispersion(AllConstants)
-			ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
+			AllConstants = P2Control.ReadECs()
+			NewAcoustics = P2Control.Dispersion(AllConstants)
+			ShiftedFreqs = P2Control.ShiftPlusECs(NewAcoustics)
 
 		#Now we have the shifted freqs...
 		if P2Count == 1:

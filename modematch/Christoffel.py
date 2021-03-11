@@ -145,6 +145,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		ss_freqs = ss_params.get_SS()[0]
 		ss_freqs = np.reshape(ss_freqs,(-1, dim))
 		DispFreqs = []
+		mesh = ss_params.get_SS()[1]
 
 		for i in range(TotKpts):
 			x1 = mesh[i,:]
