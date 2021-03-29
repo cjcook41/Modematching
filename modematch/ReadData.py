@@ -36,6 +36,8 @@ class ReadIFile:
 					p1vol_list = np.append(p1vol_list,line)
 				elif Label == 'P2Volumes'.lower():
 					p2vol_list = np.append(p2vol_list,line)
+				elif Label == 'Pmax'.lower():
+					Pmax = float(line)
 				elif Label == 'Blank':
 					continue
 		file.close()
@@ -73,7 +75,7 @@ class ReadIFile:
 			P2atom_array = AtomIDS(P2atom_list)	
 		acoustic_job = AcousticJobID(acoustic_list)
 	
-		return P1atom_array, P2atom_array, xtal_list, acoustic_job, p1vol_list, p2vol_list
+		return P1atom_array, P2atom_array, xtal_list, acoustic_job, p1vol_list, p2vol_list, Pmax
 
 class ReadYaml:
 	def __init__(self, f):
@@ -90,6 +92,7 @@ class ReadYaml:
 			tmp = (latt[i].replace('- [','').replace(',','').replace(']','')).split()
 			tmp = np.double(tmp[0:3])
 			lattice = np.append(lattice,tmp)
+		file.close()
 		return lattice
 
 	def get_SS(self):
@@ -122,7 +125,7 @@ class ReadYaml:
 		Kpoints = np.double(Kpoints)
 		Frequencies = np.array(Frequencies)
 		Frequencies = ''.join(Frequencies)
-		Frequencies = np.fromstring(Frequencies, dtype = np.float,sep = '\n')
+		Frequencies = np.fromstring(Frequencies, dtype = float,sep = '\n')
 		file.close()
 		return Frequencies, Kpoints
 	
@@ -165,23 +168,23 @@ class ReadYaml:
 		Eigenvectors = np.double(Eigenvectors)
 		Frequencies = np.array(Frequencies)
 		Frequencies = ''.join(Frequencies)
-		Frequencies = np.fromstring(Frequencies, dtype = np.float,sep = '\n')
+		Frequencies = np.fromstring(Frequencies, dtype = float,sep = '\n')
 		file.close()
 		return Frequencies, Eigenvectors
 	
 class ReadElastic:
-    def __init__(self, t):
-        self.tensor = t
-    def get_tensor(self):
-        file = open(self.tensor,"r")
-        tens_array = []
-        for line in file:
-            line = line.split()
-            tens_array.append(line)
-        tens_array = np.array(tens_array)
-        tens_array = tens_array.astype(float)
-        file.close()
-        return tens_array
+	def __init__(self, t):
+		self.tensor = t
+	def get_tensor(self):
+		file = open(self.tensor,"r")
+		tens_array = []
+		for line in file:
+			line = line.split()
+			tens_array.append(line)
+		tens_array = np.array(tens_array)
+		tens_array = tens_array.astype(float)
+		file.close()
+		return tens_array
 
 class ReadLattice:
 	def __init__(self,l):
@@ -195,16 +198,18 @@ class ReadLattice:
 			vecs.append(line)
 		vecs = np.array(vecs)
 		vecs = vecs.astype(float)
+		file.close()
 		return vecs
 class Quasiharmonic:
-    def __init__(self, v):
-        self.evcurve = v
-    def get_evcurve(self):
-        file = open(self.evcurve,"r")
-        ev_data = list(file)
-        ev_data = [x for x in ev_data if "#" not in x]
-        ev_data = ''.join(ev_data)
-        ev_data = np.fromstring(ev_data, dtype = np.float, sep = '\n')
-        ev_data = np.reshape(ev_data,(-1,2))
-        return ev_data
+	def __init__(self, v):
+		self.evcurve = v
+	def get_evcurve(self):
+		file = open(self.evcurve,"r")
+		ev_data = list(file)
+		ev_data = [x for x in ev_data if "#" not in x]
+		ev_data = ''.join(ev_data)
+		ev_data = np.fromstring(ev_data, dtype = float, sep = '\n')
+		ev_data = np.reshape(ev_data,(-1,2))
+		file.close()
+		return ev_data
 

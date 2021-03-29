@@ -8,7 +8,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "/home/cameron/Documents/GradSchool/malibu_backup/Software/MM_Suite/pycharm/package/venv"
+setenv VIRTUAL_ENV "/home/cameron/Documents/GradSchool/malibu_backup/ThirdYear/qha/python_module/troubleshooting/stable_roommate/MM_implementation/modematch/venv"
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/bin:$PATH"

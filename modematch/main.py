@@ -5,8 +5,8 @@ import sys
 
 def RunJob():
 
-	#Job description
-	#IFile = str(sys.argv)
+	print('Modematch v0.0.5')
+	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
 
 	job_description = data.ReadIFile('infile') #Chnge this when im done(?)
 	job_params = job_description.get_data()
@@ -17,14 +17,15 @@ def RunJob():
 	acoustic_ID = job_params[3]
 	p1freq_vols = job_params[4]
 	p2freq_vols = job_params[5]
+	Pmax = job_params[6]
 
-	Press = np.arange(0,1.01,0.01)
+	Press = np.arange(0,Pmax+0.01,0.01)
 
 	if P2atom_IDs == 0:
 		PhaseTrans = False
 		print('Only 1 structure, no phase trans...')
 		natoms = sum(P1atom_IDs)
-		dim = 3 * natoms
+		#dim = 3 * natoms
 		poly1 = struct_IDs[0].rstrip()
 
 	else:
@@ -32,8 +33,8 @@ def RunJob():
 		print('Multiple structures. Predicting Phase Transition...')
 		P1atoms = sum(P1atom_IDs)
 		P2atoms = sum(P2atom_IDs)
-		P1dim = 3 * P1atoms
-		P2dim = 3 * P2atoms
+		#P1dim = 3 * P1atoms
+		#P2dim = 3 * P2atoms
 		poly1 = struct_IDs[0].rstrip()
 		poly2 = struct_IDs[1].rstrip()
 
@@ -85,10 +86,7 @@ def RunJob():
 			ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
-			ShiftedFreqs = P1Control.Modematch()
-
-		#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		#	print('Need EC as an input; implement this')
+			ShiftedFreqs = P1Control.Modematch()[0]
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
 			AllConstants = P1Control.ReadECs()
@@ -123,15 +121,13 @@ def RunJob():
 			ShiftedFreqs = P2Control.ShiftPlusECs(NewAcoustics)
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
-			ShiftedFreqs = P2Control.Modematch()
+			ShiftedFreqs = P2Control.Modematch()[0]
 
-		#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		#	print('Need EC as an input; implement this')
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-			AllConstants = P1Control.ReadECs()
-			NewAcoustics = P1Control.Dispersion(AllConstants)
-			ShiftedFreqs = P1Control.ShiftPlusECs(NewAcoustics)
+			AllConstants = P2Control.ReadECs()
+			NewAcoustics = P2Control.Dispersion(AllConstants)
+			ShiftedFreqs = P2Control.ShiftPlusECs(NewAcoustics)
 
 		#Now we have the shifted freqs...
 		if P2Count == 1:

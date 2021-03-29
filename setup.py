@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
 	name = "modematch",
-	version = "0.0.1",
+	version = "0.0.5",
 	author="Cameron Cook",
 	author_email="cam.cook32@gmail.com",
 	description="Crystal free energy prediction suite",
@@ -16,6 +16,7 @@ setuptools.setup(
 		'numpy',
 		'sympy',
 		'pandas',
+		'matching.games',
 		],
 	url="https://github.com/cjcook41/Modematching.git",
 	classifiers=[
@@ -23,5 +24,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
 	],
-	python_requires='>=3.6',
+	python_requires='>=3.7',
 )
