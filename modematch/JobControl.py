@@ -31,9 +31,8 @@ class Control:
 
 			Supercell_Params = data.ReadYaml(SSFreqFile)
 			[ss_freqs, mesh] = Supercell_Params.get_SS()
-
-			shifted_freqs = modematch.Match(self.atoms,ss_freqs,RefFreqFile,ShiftFreqFile)
-
+			shifted_freqs  = modematch.Match(self.atoms,ss_freqs,RefFreqFile,ShiftFreqFile)
+			np.savetxt(self.xtal + x + 'freqs.csv', shifted_freqs)
 			AllFreqs = np.append(AllFreqs, shifted_freqs)
 		
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
@@ -143,6 +142,7 @@ class Control:
 			ECs = []
 			for line in file:
 				ECs = np.append(ECs, np.double(line.split()))
+			file.close()
 			AllConstants = np.append(AllConstants,ECs)
 		AllConstants = AllConstants.reshape([self.count,-1])
 		return AllConstants
@@ -158,11 +158,14 @@ class Control:
 			SubDir = XtalPath + y
 
 			SSFreqFile = SubDir + os.path.sep + self.xtal + y + '.ss.yaml'
+			ShiftedFreqFile = SubDir + os.path.sep + self.xtal + y + '.freqs'
 			Supercell_Params = data.ReadYaml(SSFreqFile)
 			lattice = Supercell_Params.get_lattice()
 
 			InputECs = ECs[x]
 			NewFreqs = Christoffel.ECAcoustics(self.atoms,SSFreqFile,InputECs,lattice)
+
+			np.savetxt(ShiftedFreqFile, NewFreqs)
 			AllFreqs = np.append(AllFreqs, NewFreqs)
 		
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
@@ -178,9 +181,11 @@ class Control:
 			SubDir = XtalPath + y
 			RefFreqFile = SubDir + os.path.sep + self.xtal + y  + '.ref.yaml'
 			ShiftFreqFile = SubDir + os.path.sep + self.xtal + y + '.shift.yaml'
-
+			ShiftedFreqFile = SubDir + os.path.sep + self.xtal + y + '.freqs'
 			ss_freqs = Freqs[x,:]
 			NewFreqs = modematch.Match(self.atoms,ss_freqs,RefFreqFile,ShiftFreqFile)
+
+			np.savetxt(ShiftedFreqFile, NewFreqs)
 			AllFreqs = np.append(AllFreqs, NewFreqs)
 
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))

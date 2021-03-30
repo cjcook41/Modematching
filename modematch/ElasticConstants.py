@@ -11,6 +11,7 @@ def ElasticConstants(stresses,strains):
 	stresses = stresses.get_tensor()
 	strains = strains.get_tensor()
 
+	stresses = stresses * 2 # Ha to Ry
 
 	C11, C12, C13, C14, C15, C16 = symbols('C11 C12 C13 C14 C15 C16')
 	C22, C23, C24, C25, C26 = symbols('C22 C23 C24 C25 C26')
@@ -63,6 +64,7 @@ def ElasticConstants(stresses,strains):
 
 
 #Get range of stress/strains to fit over
+
 	e_range = np.arange(np.min(strains) - 0.0005,np.max(strains) + 0.0005 ,0.0005)
 	t_range1 = []
 	t_range2 = []
@@ -306,7 +308,7 @@ def ElasticConstants(stresses,strains):
 	new_strain = np.reshape(new_strain,(-1,3))
 	new_stress = np.reshape(new_stress,(-1,3))
 
-	new_stress = (new_stress * 2) / np.power(bohr2ang,3) * np.power(ang2m,3) * ry2joule / pa2kbar
+	new_stress = (new_stress) / np.power(bohr2ang,3) * np.power(ang2m,3) * ry2joule / pa2kbar
 
 #Zero out small strains(Should be zero!!)
 	low = abs(new_strain) < 1E-10
@@ -514,29 +516,42 @@ def ElasticConstants(stresses,strains):
 				t_vec = []
 				e_vec = []
 			
+	
 
+	#Inflection Points -- EQ Elastic Constant at 0 strain
+	#Strain1
+	C11 = (max(C11_) + min(C11_)) / 2
+	C12 = (max(C12_) + min(C12_)) / 2
+	C13 = (max(C13_) + min(C13_)) / 2
+	C14 = (max(C14_) + min(C14_)) / 2
+	C15 = (max(C15_) + min(C15_)) / 2
+	C16 = (max(C16_) + min(C16_)) / 2
 
-	C11 = sum(C11_) / len(C11_) / 2
-	C12 = sum(C12_) / len(C12_)
-	C13 = sum(C13_) / len(C13_)
-	C14 = sum(C14_) / len(C14_)
-	C15 = sum(C15_) / len(C15_)
-	C16 = sum(C16_) / len(C16_)
-	C22 = sum(C22_) / len(C22_) / 2
-	C23 = sum(C23_) / len(C23_)
-	C24 = sum(C24_) / len(C24_)
-	C25 = sum(C25_) / len(C25_)
-	C26 = sum(C26_) / len(C26_)
-	C33 = sum(C33_) / len(C33_) / 2
-	C34 = sum(C34_) / len(C34_)
-	C35 = sum(C35_) / len(C35_)
-	C36 = sum(C36_) / len(C36_)
-	C44 = sum(C44_) / len(C44_) / 2
-	C45 = sum(C45_) / len(C45_)
-	C46 = sum(C46_) / len(C46_)
-	C55 = sum(C55_) / len(C55_) / 2
-	C56 = sum(C56_) / len(C56_)
-	C66 = sum(C66_) / len(C66_) / 2
+	#Strain2
+	C22 = (max(C22_) + min(C22_)) / 2
+	C23 = (max(C23_) + min(C23_)) / 2
+	C24 = (max(C24_) + min(C24_)) / 2
+	C25 = (max(C25_) + min(C25_)) / 2
+	C26 = (max(C26_) + min(C26_)) / 2
+
+	#Strain3
+	C33 = (max(C33_) + min(C33_)) / 2
+	C34 = (max(C34_) + min(C34_)) / 2
+	C35 = (max(C35_) + min(C35_)) / 2
+	C36 = (max(C36_) + min(C36_)) / 2
+
+	#Strain4
+	C66 = (max(C66_) + min(C66_)) / 2
+
+	#Strain5
+	C55 = (max(C55_) + min(C55_)) / 2
+	C56 = (max(C56_) + min(C56_)) / 2
+
+	#Strain6
+	C44 = (max(C44_) + min(C44_)) / 2
+	C45 = (max(C45_) + min(C45_)) / 2
+	C46 = (max(C46_) + min(C46_)) / 2
+
 
 	EC_matrix = np.array([[C11, C12, C13, C14, C15, C16],[C12, C22, C23, C24, C25, C26], [C13, C23, C33, C34, C35, C36],[C14, C24, C34, C44, C45, C46],[C15, C25, C35, C45, C55, C56],[C16, C26, C36, C46, C56, C66]])
 	EC_matrix = -(EC_matrix)

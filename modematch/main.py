@@ -5,9 +5,10 @@ import sys
 
 def RunJob():
 
-	print('Modematch v0.0.4')
-	#Job description
-	#IFile = str(sys.argv)
+
+	print('Modematch v0.0.5')
+	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
+
 
 	job_description = data.ReadIFile('infile') #Chnge this when im done(?)
 	job_params = job_description.get_data()
@@ -26,7 +27,7 @@ def RunJob():
 		PhaseTrans = False
 		print('Only 1 structure, no phase trans...')
 		natoms = sum(P1atom_IDs)
-		dim = 3 * natoms
+		#dim = 3 * natoms
 		poly1 = struct_IDs[0].rstrip()
 
 	else:
@@ -34,8 +35,8 @@ def RunJob():
 		print('Multiple structures. Predicting Phase Transition...')
 		P1atoms = sum(P1atom_IDs)
 		P2atoms = sum(P2atom_IDs)
-		P1dim = 3 * P1atoms
-		P2dim = 3 * P2atoms
+		#P1dim = 3 * P1atoms
+		#P2dim = 3 * P2atoms
 		poly1 = struct_IDs[0].rstrip()
 		poly2 = struct_IDs[1].rstrip()
 
@@ -89,9 +90,6 @@ def RunJob():
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
 			ShiftedFreqs = P1Control.Modematch()[0]
 
-		#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		#	print('Need EC as an input; implement this')
-
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
 			AllConstants = P1Control.ReadECs()
 			NewAcoustics = P1Control.Dispersion(AllConstants)
@@ -127,8 +125,6 @@ def RunJob():
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'false': ##No EC acoustics at all
 			ShiftedFreqs = P2Control.Modematch()[0]
 
-		#elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
-		#	print('Need EC as an input; implement this')
 
 		elif acoustic_ID[0].lower() == 'false' and acoustic_ID[1].lower() == 'true': ##User input EC's
 			AllConstants = P2Control.ReadECs()
