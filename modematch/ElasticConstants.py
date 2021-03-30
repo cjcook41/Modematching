@@ -64,7 +64,8 @@ def ElasticConstants(stresses,strains):
 
 
 #Get range of stress/strains to fit over
-	e_range = np.arange(np.min(strains) - 0.0005,np.max(strains) + 0.0005 ,0.00025)
+
+	e_range = np.arange(np.min(strains) - 0.0005,np.max(strains) + 0.0005 ,0.0005)
 	t_range1 = []
 	t_range2 = []
 	t_range3 = []
@@ -371,6 +372,7 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec 
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C12, C22, C23, C24, C25, C26])
+				C12_.append(ans[C12])
 				C22_.append(ans[C22])
 				C23_.append(ans[C23])
 				C24_.append(ans[C24])
@@ -388,6 +390,8 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec 
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C13, C23, C33, C34, C35, C36])
+				C13_.append(ans[C13])
+				C23_.append(ans[C23])
 				C33_.append(ans[C33])
 				C34_.append(ans[C34])
 				C35_.append(ans[C35])
@@ -404,6 +408,11 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C16, C26, C36, C46, C56, C66])
+				C16_.append(ans[C16])
+				C26_.append(ans[C26])
+				C36_.append(ans[C36])
+				C46_.append(ans[C46])
+				C56_.append(ans[C56])
 				C66_.append(ans[C66])
 				t_vec = []
 				e_vec = []
@@ -417,6 +426,10 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C15, C25, C35, C45, C55, C56])
+				C15_.append(ans[C15])
+				C25_.append(ans[C25])
+				C35_.append(ans[C35])
+				C45_.append(ans[C45])
 				C55_.append(ans[C55])
 				C56_.append(ans[C56])
 				t_vec = []
@@ -431,6 +444,9 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C14, C24, C34, C44, C45, C46])
+				C14_.append(ans[C14])
+				C24_.append(ans[C24])
+				C34_.append(ans[C34])
 				C44_.append(ans[C44])
 				C45_.append(ans[C45])
 				C46_.append(ans[C46])
@@ -535,6 +551,7 @@ def ElasticConstants(stresses,strains):
 	C44 = (max(C44_) + min(C44_)) / 2
 	C45 = (max(C45_) + min(C45_)) / 2
 	C46 = (max(C46_) + min(C46_)) / 2
+
 
 	EC_matrix = np.array([[C11, C12, C13, C14, C15, C16],[C12, C22, C23, C24, C25, C26], [C13, C23, C33, C34, C35, C36],[C14, C24, C34, C44, C45, C46],[C15, C25, C35, C45, C55, C56],[C16, C26, C36, C46, C56, C66]])
 	EC_matrix = -(EC_matrix)

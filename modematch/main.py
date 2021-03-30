@@ -5,8 +5,10 @@ import sys
 
 def RunJob():
 
+
 	print('Modematch v0.0.5')
 	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
+
 
 	job_description = data.ReadIFile('infile') #Chnge this when im done(?)
 	job_params = job_description.get_data()
