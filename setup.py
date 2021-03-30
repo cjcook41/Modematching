@@ -16,7 +16,7 @@ setuptools.setup(
 		'numpy',
 		'sympy',
 		'pandas',
-		'matching.games',
+		'matching',
 		],
 	url="https://github.com/cjcook41/Modematching.git",
 	classifiers=[
