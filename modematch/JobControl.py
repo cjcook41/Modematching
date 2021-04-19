@@ -62,20 +62,11 @@ class Control:
 			SSFreqFile = XtalPath + self.xtal + x + '.ss.yaml'
 			RefFreqFile = XtalPath + self.xtal + x + '.ref.yaml'
 			ShiftFreqFile = XtalPath + self.xtal + x + '.shift.yaml'
-			StrainFile = XtalPath + self.xtal + '.strains'
-			StressFile = XtalPath + self.xtal + x + '.stresses'
 
 			SSFreqFileOut = SubDir + os.path.sep + self.xtal + x + '.ss.yaml'
 			RefFreqFileOut = SubDir + os.path.sep + self.xtal + x + '.ref.yaml'
 			ShiftFreqFileOut = SubDir + os.path.sep + self.xtal + x + '.shift.yaml'
-			StrainFileOut = SubDir + os.path.sep + self.xtal + '.strains'
-			StressFileOut = SubDir + os.path.sep + self.xtal + x + '.stresses'
 
-			try:
-				copyfile(StrainFile,StrainFileOut)
-			except OSError as e:
-				print('Cannot Find file %s' % e)
-				continue
 			try:
 				os.rename(SSFreqFile, SSFreqFileOut)
 			except FileExistsError:
@@ -94,23 +85,33 @@ class Control:
 				os.remove(ShiftFreqFileOut)
 				os.rename(ShiftFreqFile, ShiftFreqFileOut)
 
-			try:
-				os.rename(StressFile, StressFileOut)
-			except FileExistsError:
-				os.remove(StressFileOut)
-				os.rename(StressFile, StressFileOut)
-
 	def SolveECs(self):
 		print("Solving ", self.xtal, " Elastic Constants...")
-		CurrentDir = os.getcwd() #+ os.path.sep + 'datafiles'
+		CurrentDir = os.getcwd()
 		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		AllConstants = []
 		for x in range(self.count):
 			x = str(x + 1)
 			SubDir = XtalPath + x
-			StrainFile = SubDir + os.path.sep + self.xtal + '.strains'
-			StressFile = SubDir + os.path.sep + self.xtal + x + '.stresses'
-			EC_Matrix = ECs.ElasticConstants(StressFile,StrainFile)
+
+			StrainFile = XtalPath + self.xtal + '.strains'
+			StressFile = XtalPath + self.xtal + x + '.stresses'
+
+			#StrainFileOut = SubDir + os.path.sep + self.xtal + '.strains'
+			StressFileOut = SubDir + os.path.sep + self.xtal + x + '.stresses'
+
+			#try:
+			#	os.rename(StrainFile,StrainFileOut)
+			#except FileExistsError:
+			#	os.remove(StrainFileOut)
+			#	os.rename(StrainFile,StrainFileOut)
+			try:
+				os.rename(StressFile,StressFileOut)
+			except FileExistsError:
+				os.remove(StressFileOut)
+				os.rename(StressFile,StressFileOut)
+
+			EC_Matrix = ECs.ElasticConstants(StressFileOut,StrainFile)
 			ECFile = XtalPath + self.xtal + x + '.ecs'
 			np.savetxt(ECFile, EC_Matrix, delimiter='\t')
 			EC_Matrix = EC_Matrix.flatten()
