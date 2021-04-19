@@ -6,7 +6,7 @@ import sys
 def RunJob():
 
 
-	print('Modematch v0.0.5')
+	print('Modematch version 0.0.7')
 	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
 
 
@@ -64,7 +64,7 @@ def RunJob():
 		#Now we have the shifted freqs...
 		if P1Count == 1:
 			print("One structure, no QHA")
-			import GetDOS as dos
+			from . import GetDOS as dos
 			import pandas as pd
 			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,natoms)
 			ThermoData = pd.DataFrame({'Temperature':np.array(T),
@@ -98,7 +98,7 @@ def RunJob():
 		if P1Count == 1:
 			P1CheckQHA = False
 			print("One structure, no QHA")
-			import GetDOS as dos
+			from . import GetDOS as dos
 			import pandas as pd
 			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,P1atoms)
 			P1ThermoData = pd.DataFrame({'Temperature':np.array(T),
