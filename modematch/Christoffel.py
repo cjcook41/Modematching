@@ -14,9 +14,28 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		b = lattice[1,:]
 		c = lattice[2,:]
 
+		#a_norm = np.linalg.norm(a)
+		#b_norm = np.linalg.norm(b)
+		#c_norm = np.linalg.norm(c)
+
+		#beta = np.arccos(np.dot(a,c) / (a_norm * c_norm))
+		#alpha = np.arccos(np.dot(b,c) / (b_norm * c_norm))
+		#gamma = np.arccos(np.dot(a,b) / (a_norm * b_norm))
+
 		v_cross = np.cross(b,c)
 		v_dot = np.dot(a,v_cross)
 		volume = v_dot * np.power(1E-10,3) 
+
+		#Get the reciprocal Lattice
+		recip_lattice = []
+		astar = 1 / v_dot * np.cross(b,c)
+		bstar = 1 / v_dot * np.cross(a,c)
+		cstar = 1 / v_dot * np.cross(a,b)
+		recip_lattice.append(astar)
+		recip_lattice.append(bstar)
+		recip_lattice.append(cstar)
+		recip_lattice = np.reshape(np.array(recip_lattice),([3,3]))
+
 
 		num_C = atom_IDs[0]
 		num_H = atom_IDs[1]
@@ -62,8 +81,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 
 		Wmax = []
 		for i in range(int(np.size(kpt_sampling_directions)/3)):
-			vec_length = np.linalg.norm(kpt_sampling_directions[i,:])
-			d_cos = kpt_sampling_directions[i] / vec_length
+			d_cos = np.matmul(kpt_sampling_directions[i],recip_lattice)/ np.linalg.norm(np.matmul(kpt_sampling_directions[i], recip_lattice)) ##direction cosines with respect to reciprocal lattice
 			
 			#Building the Christoffel matrix, \Gamma_ik
 			A_1 = np.square(d_cos[0])*C[0,0] + np.square(d_cos[1])*C[5,5] + np.square(d_cos[2])*C[4,4] + 2*d_cos[1]*d_cos[2]*C[4,5] + 2*d_cos[2]*d_cos[0]*C[0,4] + 2*d_cos[0]*d_cos[1]*C[0,5]
@@ -76,7 +94,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			#Christoffel_Mat = np.zeros([3,3])
 			Christoffel_Mat[0,0] = A_1
 			Christoffel_Mat[0,1] = alpha_12
-			Christoffel_Mat[0,2] = alpha_23
+			Christoffel_Mat[0,2] = alpha_13
 			Christoffel_Mat[1,0] = alpha_12
 			Christoffel_Mat[1,1] = A_2
 			Christoffel_Mat[1,2] = alpha_23
@@ -85,8 +103,8 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			Christoffel_Mat[2,2] = A_3
 			
 			PhaseVelocity = np.linalg.eig(Christoffel_Mat)[0] # = pv^2
-			kzb_vec = np.linalg.norm(np.matmul(kpt_sampling_directions[i,:],lattice))
-			kzb = (1 / (kzb_vec * 1E-10))
+			kzb = np.linalg.norm(d_cos) / 1E-10 # --- Length in pi / meter -- kzb 
+
 
 			PhaseVelocity = np.transpose(PhaseVelocity)
 			PhaseVelocity = np.sqrt(PhaseVelocity / density)
@@ -94,24 +112,26 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			nan_ind = np.isnan(PhaseVelocity)
 			PhaseVelocity[nan_ind] = 0
 
-			Coeff = 2 * PhaseVelocity * kzb 
+			Coeff = 2 * PhaseVelocity * kzb / np.pi
 			Coeff = Coeff / THz * wvnum
 			Wmax = np.append(Wmax,Coeff)
 
 		Wmax = Wmax.reshape([-1,3])
-		a_Wmax = Wmax[:,0]
-		b_Wmax = Wmax[:,1]
-		c_Wmax = Wmax[:,2] 
 
-		a_Wmax = a_Wmax[a_Wmax!=0]
-		b_Wmax = b_Wmax[b_Wmax!=0]
-		c_Wmax = c_Wmax[c_Wmax!=0]
+		#Using Wmax averages... not going this route
+		#a_Wmax = Wmax[:,0]
+		#b_Wmax = Wmax[:,1]
+		#c_Wmax = Wmax[:,2]
 
-		a_Wmax = np.average(a_Wmax)
-		b_Wmax = np.average(b_Wmax)
-		c_Wmax = np.average(c_Wmax)
+		#a_Wmax = a_Wmax[a_Wmax!=0]
+		#b_Wmax = b_Wmax[b_Wmax!=0]
+		#c_Wmax = c_Wmax[c_Wmax!=0]
 
-		avg_Wmax = np.array([a_Wmax, b_Wmax, c_Wmax])
+		#a_Wmax = np.average(a_Wmax)
+		#b_Wmax = np.average(b_Wmax)
+		#c_Wmax = np.average(c_Wmax)
+
+		#avg_Wmax = np.array([a_Wmax, b_Wmax, c_Wmax])
 
 		#Assign kpt direction in mesh sampling + Smoothing of the bands at kpt boundaries
 		all_ids = []
@@ -133,14 +153,21 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 					bool_array = np.append(bool_array,test)
 				if bool_array.all() == 1:
 					all_ids = np.append(all_ids, j)
+
+		Wmax_directions = []
 		for i in range(np.size(all_ids) - 1):
 			if i != 1:
 				checkBack = all_ids[i-1]
 				checkFront = all_ids[i+1]
 				if all_ids[i] != checkBack and checkFront:
 					all_ids[i] = checkFront
+			Wmax_directions = np.append(Wmax_directions,Wmax[int(all_ids[i]),:])
+		Wmax_directions = (Wmax_directions.reshape([-1,3]))
+		Wmax2 = np.array((np.average(Wmax_directions[:,0]), np.average(Wmax_directions[:,1]), np.average(Wmax_directions[:,2])))
+		
 		#Add ID for endpoint
 		all_ids = np.append(all_ids, all_ids[-1])
+
 		TotKpts = np.size(all_ids)
 
 		ss_freqs = ss_params.get_SS()[0]
@@ -151,7 +178,8 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		for i in range(TotKpts):
 			x1 = mesh[i,:]
 			dir_id = int(all_ids[i])
-			y = avg_Wmax * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[6,:])) * np.pi / 2))
+			y =  Wmax2 * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])) * np.pi / 2))
+
 			DispFreqs = np.append(DispFreqs,y)
 
 		DispFreqs = DispFreqs.reshape([-1,3])
