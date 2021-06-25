@@ -44,7 +44,7 @@ Modematch can then be installed via pip:
 
 `python setup.py sdist`
 
-`pip install modematch/modematch-0.0.7.tar.gz/`
+`pip install dist/modematch-0.0.7.tar.gz/`
 
 
 ## Running the Code
@@ -78,7 +78,11 @@ Volume dependent free energies are evaluated at a series of pressures up to `\$P
   * `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
   * PhaseDiagram file containing temperatures, enthalpies, and entropies of transition as a function of P
   
-  
+ 
+## Additional Consideration
+As of now, Modematching does not account for uniform kpt sampling. The supercell phonons must be along user-defined kpaths within the Brillouin zone. This supplies he code with the well-defined bands to shift during the matching procedure. Future versions will implement uniform sampling.
+
+ 
 ## Citation
 Please refer to the following publications for more information and citation:
 * https://doi.org/10.1063/5.0032649
