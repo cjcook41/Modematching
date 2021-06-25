@@ -2,7 +2,7 @@
 Phonon normal mode-matching algorithm used for upscaling low-accuracy semi-empirical (DFTB) phonons to full ab initio (DFT)
 
 <p align="center">
-  <img src="https://github.com/cjcook41/Modematching/blob/cjcook41-patch-3/images/GitFig1.png">
+  <img src="https://github.com/cjcook41/Modematching/blob/main/images/GitFig1.png">
 </p>
 
 This code contains a full suite of finite temperature free energy predictions based on pre-calculated harmonic phonons. 
@@ -44,7 +44,7 @@ Modematch can then be installed via pip:
 
 `python setup.py sdist`
 
-`pip install modematch/modematch-0.0.4.tar.gz/`
+`pip install modematch/modematch-0.0.7.tar.gz/`
 
 
 ## Running the Code
