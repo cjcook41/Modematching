@@ -74,7 +74,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			T_fit = np.polyval(G_polyfit,VGrid)
 			initV = VGrid[np.argmin(T_fit)]
 
-			opt_params = optimize.minimize(PolyGFxn,initV) #Provides initial Vmin and Gmin for Murnaghan Fit
+			opt_params = optimize.minimize(PolyGFxn,initV,method='BFGS') #Provides initial Vmin and Gmin for Murnaghan Fit
 			minimum = opt_params.x[0]
 			minGibbs = opt_params.fun
 
@@ -114,24 +114,6 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 				VolExp = Volumes[0:MinIndex  + 1]
 				GibbsComp = Gibbs[MinIndex - 3:-1]
 				GibbsExp = Gibbs[0:MinIndex  + 1]
-		
-		#Sets up weights for the nonlinear fit applied to Murn (Unnecessary?) BREAKS CODE; OVERWRITES VOLS
-		#Wcomp = VolComp
-		#for i in range(len(VolComp)):
-		#	if abs(Wcomp[i] - Gmin_Volume) == 0:
-		#		Wcomp[i] = 1.0
-		#	elif abs(Wcomp[i] - Gmin_Volume) < 50:
-		#		Wcomp[i] = 0.25
-			#else:
-				#Wcomp[i]
-		#Wexp = VolExp
-		#for i in range(len(VolExp)):
-		#	if abs(Wexp[i] - Gmin_Volume) == 0:
-		#		Wexp[i] = 1.0
-		#	elif abs(Wexp[i] - Gmin_Volume) < 50:
-		#		Wexp[i] = 0.25
-		#	else:
-		#		Wexp[i] = 0.1
 
 		#Get optimized parameters for Compression and Expansion branches
 			a = [5.0,8.0]
@@ -150,7 +132,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 
 			#OptimalVolume = optimize.brent(DoubleMurn,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),brack=(Vmin,Vmax))
 			#OptimalGibbs = DoubleMurn(OptimalVolume,minimum,minGibbs,Comp_coeffs,Exp_coeffs)
-			OptimalParams = optimize.minimize(DoubleMurn,minimum,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs))
+			OptimalParams = optimize.minimize(DoubleMurn,minimum,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),method='BFGS')
 			OptimalVolume = OptimalParams.x[0]
 			OptimalGibbs = OptimalParams.fun
 			OptimalFvib = np.polyval(F_polyfit,OptimalVolume)
