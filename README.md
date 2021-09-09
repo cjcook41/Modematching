@@ -82,3 +82,11 @@ Volume dependent free energies are evaluated at a series of pressures up to `\$P
 ## Citation
 Please refer to the following publications for more information and citation:
 * https://doi.org/10.1063/5.0032649
+
+### Patch Notes
+v0.0.8
+* Corrected a unit conversion error in Christoffel.py
+* Corrected a reciprocal space transform error in Christoffel.py
+* Fixed a bug in the kpt sampling directions when assigning the acoustic mode dispersion
+* Specified the BFGS optimizer in the minimization of the Murnaghan E.O.S in qha2.py for consistency
+

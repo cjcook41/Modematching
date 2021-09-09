@@ -101,12 +101,6 @@ def EvaluateDOS(ssfreqs, natoms):
 		Svib = 3 * R * Svib * natoms # // Fultz 2009
 		SvibArray = np.append(SvibArray, Svib)
 
-	#AllData = pd.DataFrame({'Temperature': np.array(T),
-                                    #'Hvib': np.array(HvibArray),
-                                    #'Svib': np.array(SvibArray),
-                                    #'Fvib': np.array(FvibArray)})
-
-
 	return FvibArray, HvibArray, SvibArray, T
 
 class Thermo:

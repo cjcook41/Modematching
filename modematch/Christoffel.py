@@ -1,6 +1,5 @@
 from . import ReadData as data
 import numpy as np
-import cmath
 
 def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		dim = sum(atom_IDs) * 3
@@ -14,28 +13,19 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		b = lattice[1,:]
 		c = lattice[2,:]
 
-		#a_norm = np.linalg.norm(a)
-		#b_norm = np.linalg.norm(b)
-		#c_norm = np.linalg.norm(c)
-
-		#beta = np.arccos(np.dot(a,c) / (a_norm * c_norm))
-		#alpha = np.arccos(np.dot(b,c) / (b_norm * c_norm))
-		#gamma = np.arccos(np.dot(a,b) / (a_norm * b_norm))
-
 		v_cross = np.cross(b,c)
 		v_dot = np.dot(a,v_cross)
 		volume = v_dot * np.power(1E-10,3) 
 
 		#Get the reciprocal Lattice
 		recip_lattice = []
-		astar = 1 / v_dot * np.cross(b,c)
-		bstar = 1 / v_dot * np.cross(a,c)
-		cstar = 1 / v_dot * np.cross(a,b)
+		astar = (2*np.pi) / v_dot * np.cross(b,c)
+		bstar = (2*np.pi) / v_dot * np.cross(a,c)
+		cstar = (2*np.pi) / v_dot * np.cross(a,b)
 		recip_lattice.append(astar)
 		recip_lattice.append(bstar)
 		recip_lattice.append(cstar)
-		recip_lattice = np.reshape(np.array(recip_lattice),([3,3]))
-
+		recip_lattice = np.reshape(np.array(recip_lattice),([3,3])) #2pi / ang
 
 		num_C = atom_IDs[0]
 		num_H = atom_IDs[1]
@@ -51,7 +41,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 
 		##Some constants
 		mass_kg = 1.66054e-27
-		THz = 10e12
+		THz = 1e12
 		bar = 1000
 		Pa = 100000
 		wvnum = 33.35641
@@ -81,8 +71,14 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 
 		Wmax = []
 		for i in range(int(np.size(kpt_sampling_directions)/3)):
-			d_cos = np.matmul(kpt_sampling_directions[i],recip_lattice)/ np.linalg.norm(np.matmul(kpt_sampling_directions[i], recip_lattice)) ##direction cosines with respect to reciprocal lattice
-			
+			d_cos = np.zeros(3)
+			recip_sampling = np.matmul(kpt_sampling_directions[i],recip_lattice)
+
+			#Take direction cosines wrt recip lattice system
+			d_cos[0] = (recip_sampling[0] / np.linalg.norm(recip_sampling))
+			d_cos[1] = (recip_sampling[1] / np.linalg.norm(recip_sampling))
+			d_cos[2] = (recip_sampling[2] / np.linalg.norm(recip_sampling))
+
 			#Building the Christoffel matrix, \Gamma_ik
 			A_1 = np.square(d_cos[0])*C[0,0] + np.square(d_cos[1])*C[5,5] + np.square(d_cos[2])*C[4,4] + 2*d_cos[1]*d_cos[2]*C[4,5] + 2*d_cos[2]*d_cos[0]*C[0,4] + 2*d_cos[0]*d_cos[1]*C[0,5]
 			A_2 = np.square(d_cos[0])*C[5,5] + np.square(d_cos[1])*C[1,1] + np.square(d_cos[2])*C[3,3] + 2*d_cos[1]*d_cos[2]*C[1,3] + 2*d_cos[2]*d_cos[0]*C[3,5] + 2*d_cos[0]*d_cos[1]*C[1,5]
@@ -103,46 +99,33 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			Christoffel_Mat[2,2] = A_3
 			
 			PhaseVelocity = np.linalg.eig(Christoffel_Mat)[0] # = pv^2
-			kzb = np.linalg.norm(d_cos) / 1E-10 # --- Length in pi / meter -- kzb 
-
+			kzb = np.linalg.norm(np.matmul(kpt_sampling_directions[i],recip_lattice)) * 1E10 / (2*np.pi) #kzb In 1 / m
 
 			PhaseVelocity = np.transpose(PhaseVelocity)
-			PhaseVelocity = np.sqrt(PhaseVelocity / density)
+			PhaseVelocity = PhaseVelocity / density # -- kg/(m*s^2) / kg/m^3 -> m^2/s^2
+			PhaseVelocity = np.sqrt(PhaseVelocity) # -- m*s^-1 -> Velocity
 			PhaseVelocity = np.real(PhaseVelocity)
 			nan_ind = np.isnan(PhaseVelocity)
 			PhaseVelocity[nan_ind] = 0
 
-			Coeff = 2 * PhaseVelocity * kzb / np.pi
-			Coeff = Coeff / THz * wvnum
+			Coeff = 2 * PhaseVelocity * kzb / np.pi # -- m/s * 1/m -> s^-1 = Frequency
+			Coeff = Coeff / THz * wvnum # -- Convert to Wavenumber
 			Wmax = np.append(Wmax,Coeff)
 
 		Wmax = Wmax.reshape([-1,3])
 
-		#Using Wmax averages... not going this route
-		#a_Wmax = Wmax[:,0]
-		#b_Wmax = Wmax[:,1]
-		#c_Wmax = Wmax[:,2]
-
-		#a_Wmax = a_Wmax[a_Wmax!=0]
-		#b_Wmax = b_Wmax[b_Wmax!=0]
-		#c_Wmax = c_Wmax[c_Wmax!=0]
-
-		#a_Wmax = np.average(a_Wmax)
-		#b_Wmax = np.average(b_Wmax)
-		#c_Wmax = np.average(c_Wmax)
-
-		#avg_Wmax = np.array([a_Wmax, b_Wmax, c_Wmax])
 
 		#Assign kpt direction in mesh sampling + Smoothing of the bands at kpt boundaries
 		all_ids = []
 		for i in range(np.size(mesh[:,0]) - 1):
 			x1 = mesh[i,:]
 			x2 = mesh[i+1,:]
+			if np.array_equal(x1,x2):
+				x2 = mesh[i-1,:]
 			direction = x2 - x1
 			dir_id = np.nonzero(direction)[0]
-			direction2 = x1
+			direction2 = np.zeros(3)
 			direction2[dir_id] = 0.5 #Edge of BZ to search for 13 "Base" kpt directions
-
 			if np.linalg.norm(x2) == 0 and np.linalg.norm(x1) == 0:
 				all_ids = np.append(all_ids,all_ids[-1])
 			
@@ -167,7 +150,6 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		
 		#Add ID for endpoint
 		all_ids = np.append(all_ids, all_ids[-1])
-
 		TotKpts = np.size(all_ids)
 
 		ss_freqs = ss_params.get_SS()[0]
@@ -178,7 +160,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		for i in range(TotKpts):
 			x1 = mesh[i,:]
 			dir_id = int(all_ids[i])
-			y =  Wmax2 * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])) * np.pi / 2))
+			y =  Wmax2 * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])) * np.pi / 2)) # -- x1 / norm(ID) both in recip space - cancel out
 
 			DispFreqs = np.append(DispFreqs,y)
 
@@ -186,6 +168,12 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		ss_freqs[:,0] = DispFreqs[:,0] / wvnum
 		ss_freqs[:,1] = DispFreqs[:,1] / wvnum
 		ss_freqs[:,2] = DispFreqs[:,2] / wvnum
+
+		TEST_TAG = SSFreqFile.replace('.ss.yaml','-acoustics.csv')
+		with open(TEST_TAG,'w') as f:
+			for line in DispFreqs:
+				f.write('{:f},{:f},{:f}\n'.format(line[0],line[1],line[2]))
+
 
 		return ss_freqs
 
