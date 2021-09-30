@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
 	name = "modematch",
-	version = "0.0.8",
+	version = "0.0.9",
 	author="Cameron Cook",
 	author_email="cam.cook32@gmail.com",
 	description="Crystal free energy prediction suite",

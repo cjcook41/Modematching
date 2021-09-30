@@ -92,5 +92,7 @@ v0.0.8
 * Corrected a unit conversion error in Christoffel.py
 * Corrected a reciprocal space transform error in Christoffel.py
 * Fixed a bug in the kpt sampling directions when assigning the acoustic mode dispersion
-* Specified the BFGS optimizer in the minimization of the Murnaghan E.O.S in qha2.py for consistency
 
+v0.0.9
+* Added a Tmax parameter to the input file for changing Trange to evaluate
+* Changed to linear extrapolation of Fvib vs. V free energy fitting. The polynomial extrapolation gives erratic behavior if the sampled volume points are not far enough from the minimum. 

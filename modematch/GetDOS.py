@@ -1,6 +1,6 @@
 import numpy as np
 
-def EvaluateDOS(ssfreqs, natoms):
+def EvaluateDOS(ssfreqs, natoms,tL):
 	ThzToCm = 33.35640952
 	Na = 6.0221367e23
 	kb = 1.3806488e-23
@@ -52,9 +52,9 @@ def EvaluateDOS(ssfreqs, natoms):
 	for i in range(np.size(x) - 1):
 		A_0 = A_0 + y_0[i] * dx
 
-	tL = 500
 	tS = 0
-	T = np.arange(tS,tL,10)
+	tL = tL + 5
+	T = np.arange(tS,tL,5)
 	FvibArray = []
 	HvibArray = []
 	SvibArray = []
