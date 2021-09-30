@@ -46,8 +46,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		Pa = 100000
 		wvnum = 33.35641
 
-		mass_tot = (num_C * mass_C + num_H * mass_H + num_O * mass_O + num_N * mass_N) * mass_kg #In kg
-
+		mass_tot = (num_C * mass_C + num_H * mass_H + num_O * mass_O + num_N * mass_N + num_S * mass_S) * mass_kg #In kg
 		density = mass_tot / volume
 		
 		C = np.reshape(ECs, (6,6))
@@ -113,7 +112,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			Wmax = np.append(Wmax,Coeff)
 
 		Wmax = Wmax.reshape([-1,3])
-
+		#print(Wmax)
 
 		#Assign kpt direction in mesh sampling + Smoothing of the bands at kpt boundaries
 		all_ids = []
@@ -137,6 +136,7 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 				if bool_array.all() == 1:
 					all_ids = np.append(all_ids, j)
 
+
 		Wmax_directions = []
 		for i in range(np.size(all_ids) - 1):
 			if i != 1:
@@ -146,8 +146,25 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 					all_ids[i] = checkFront
 			Wmax_directions = np.append(Wmax_directions,Wmax[int(all_ids[i]),:])
 		Wmax_directions = (Wmax_directions.reshape([-1,3]))
+
+		#Nonzeros of directional Wmax
+		#branch1_avg = np.average(Wmax_directions[np.nonzero(Wmax_directions[:,0])])
+		#branch2_avg = np.average(Wmax_directions[np.nonzero(Wmax_directions[:,1])])
+		#branch3_avg = np.average(Wmax_directions[np.nonzero(Wmax_directions[:,2])])
+
+		#Wmax_directions[Wmax_directions[:,0]==0] = branch1_avg
+		#Wmax_directions[Wmax_directions[:,1]==0] = branch2_avg
+		#Wmax_directions[Wmax_directions[:,2]==0] = branch3_avg
+
 		Wmax2 = np.array((np.average(Wmax_directions[:,0]), np.average(Wmax_directions[:,1]), np.average(Wmax_directions[:,2])))
-		
+
+		#All of the base kpt directions
+		#branch1 = Wmax[:,0]
+		#branch2 = Wmax[:,1]
+		#branch3 = Wmax[:,2]
+		#Wmax2 = np.array((np.average(branch1[np.nonzero(branch1)]),np.average(branch2[np.nonzero(branch2)]),np.average(branch3[np.nonzero(branch3)])))
+		#Wmax2 = np.array((np.average(branch1),np.average(branch2),np.average(branch3)))
+
 		#Add ID for endpoint
 		all_ids = np.append(all_ids, all_ids[-1])
 		TotKpts = np.size(all_ids)
@@ -157,11 +174,14 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 		DispFreqs = []
 		mesh = ss_params.get_SS()[1]
 
+		#print(Wmax,kpt_sampling_directions)
 		for i in range(TotKpts):
 			x1 = mesh[i,:]
 			dir_id = int(all_ids[i])
-			y =  Wmax2 * abs(np.sin((np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])) * np.pi / 2)) # -- x1 / norm(ID) both in recip space - cancel out
-
+			ratio = np.linalg.norm(x1) / np.linalg.norm(kpt_sampling_directions[dir_id,:])
+			#if ratio > 1:
+			#	ratio = 1
+			y =  Wmax2 * abs(np.sin((ratio) * (np.pi / 2))) # -- x1 / norm(ID) both in recip space - cancel out. Day Thesis eq. 4.43
 			DispFreqs = np.append(DispFreqs,y)
 
 		DispFreqs = DispFreqs.reshape([-1,3])

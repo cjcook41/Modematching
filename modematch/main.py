@@ -6,7 +6,7 @@ import sys
 def RunJob():
 
 
-	print('Modematch v0.0.8')
+	print('ModeMatch v0.0.9')
 	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
 
 
@@ -20,6 +20,7 @@ def RunJob():
 	p1freq_vols = job_params[4]
 	p2freq_vols = job_params[5]
 	Pmax = job_params[6]
+	tL = job_params[7]
 
 	Press = np.arange(0,Pmax+0.01,0.01)
 
@@ -27,7 +28,6 @@ def RunJob():
 		PhaseTrans = False
 		print('Only 1 structure, no phase trans...')
 		natoms = sum(P1atom_IDs)
-		#dim = 3 * natoms
 		poly1 = struct_IDs[0].rstrip()
 
 	else:
@@ -35,8 +35,6 @@ def RunJob():
 		print('Multiple structures. Predicting Phase Transition...')
 		P1atoms = sum(P1atom_IDs)
 		P2atoms = sum(P2atom_IDs)
-		#P1dim = 3 * P1atoms
-		#P2dim = 3 * P2atoms
 		poly1 = struct_IDs[0].rstrip()
 		poly2 = struct_IDs[1].rstrip()
 
@@ -66,13 +64,13 @@ def RunJob():
 			print("One structure, no QHA")
 			from . import GetDOS as dos
 			import pandas as pd
-			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,natoms)
+			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,natoms,tL)
 			ThermoData = pd.DataFrame({'Temperature':np.array(T),
 										'Enthalpy': np.array(Hvib),
 										'Entropy': np.array(Svib),
 										'Helmholtz': np.array(Fvib)})
 		else:
-			ThermoData = P1Control.QuasiHarmonic(ShiftedFreqs,p1freq_vols,Press)
+			ThermoData = P1Control.QuasiHarmonic(ShiftedFreqs,p1freq_vols,Press,tL)
 
 		filename = poly1 + '.csv'
 		ThermoData.to_csv(filename,index=False)
@@ -100,14 +98,14 @@ def RunJob():
 			print("One structure, no QHA")
 			from . import GetDOS as dos
 			import pandas as pd
-			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,P1atoms)
+			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,P1atoms,tL)
 			P1ThermoData = pd.DataFrame({'Temperature':np.array(T),
 										'Enthalpy': np.array(Hvib),
 										'Entropy': np.array(Svib),
 										'Helmholtz': np.array(Fvib)})
 		else:
 			P1CheckQHA = True
-			P1ThermoData = P1Control.QuasiHarmonic(ShiftedFreqs,p1freq_vols,Press)
+			P1ThermoData = P1Control.QuasiHarmonic(ShiftedFreqs,p1freq_vols,Press,tL)
 		filename = poly1 + '.csv'
 		P1ThermoData.to_csv(filename,index=False)
 		print('DONE WITH ', poly1)
@@ -137,14 +135,14 @@ def RunJob():
 			print("One structure, no QHA")
 			import GetDOS as dos
 			import pandas as pd
-			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,P2atoms)
+			[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(ShiftedFreqs,P2atoms,tL)
 			P2ThermoData = pd.DataFrame({'Temperature':np.array(T),
 										'Enthalpy': np.array(Hvib),
 										'Entropy': np.array(Svib),
 										'Helmholtz': np.array(Fvib)})
 		else:
 			P2CheckQHA = True
-			P2ThermoData = P2Control.QuasiHarmonic(ShiftedFreqs,p2freq_vols,Press)
+			P2ThermoData = P2Control.QuasiHarmonic(ShiftedFreqs,p2freq_vols,Press,tL)
 		filename = poly2 + '.csv'
 		P2ThermoData.to_csv(filename,index=False)
 		print('DONE WITH ', poly2)

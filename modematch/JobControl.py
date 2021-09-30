@@ -96,15 +96,8 @@ class Control:
 
 			StrainFile = XtalPath + self.xtal + '.strains'
 			StressFile = XtalPath + self.xtal + x + '.stresses'
-
-			#StrainFileOut = SubDir + os.path.sep + self.xtal + '.strains'
 			StressFileOut = SubDir + os.path.sep + self.xtal + x + '.stresses'
 
-			#try:
-			#	os.rename(StrainFile,StrainFileOut)
-			#except FileExistsError:
-			#	os.remove(StrainFileOut)
-			#	os.rename(StrainFile,StrainFileOut)
 			try:
 				os.rename(StressFile,StressFileOut)
 			except FileExistsError:
@@ -148,8 +141,6 @@ class Control:
 		AllConstants = AllConstants.reshape([self.count,-1])
 		return AllConstants
 
-
-
 	def Dispersion(self,ECs):
 		CurrentDir = os.getcwd()
 		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
@@ -192,7 +183,7 @@ class Control:
 		AllFreqs = np.reshape(AllFreqs,(self.count,-1))
 		return AllFreqs
 
-	def QuasiHarmonic(self,Freqs,Vols,Press):
+	def QuasiHarmonic(self,Freqs,Vols,Press,tL):
 		CurrentDir = os.getcwd()
 		XtalPath = CurrentDir + os.path.sep + self.xtal + os.path.sep
 		CurveFile = XtalPath + self.xtal + '.dat'
@@ -200,13 +191,11 @@ class Control:
 		ev_data = EVParams.get_evcurve()
 		Vols = np.double(Vols)
 		if np.size(Vols) == 1:
-			AllData = dos.EvaluateDOS(Freqs,self.atoms)
+			AllData = dos.EvaluateDOS(Freqs,self.atoms,tL)
 		else:
-			AllData = qha2.QHA(Freqs,Vols,ev_data,self.count,self.atoms,Press)
+			AllData = qha2.QHA(Freqs,Vols,ev_data,self.count,self.atoms,Press,tL)
 		return AllData
 		
 	def PhaseTransControl(self,AllData1,AllData2,Press):
 		PhaseTransData = qha2.PhaseTrans(AllData1,AllData2,Press)
 		return PhaseTransData
-		
-	

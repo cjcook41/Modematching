@@ -3,7 +3,7 @@ from . import GetDOS as dos
 from scipy import optimize
 import pandas as pd
 
-def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
+def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 	print('STARTING QHA')
 	Na = 6.0221367e23
 	natoms = sum(natoms)
@@ -31,7 +31,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 
 	for i in range(np.size(AllFreqs,1)):
 		freqset = np.array(AllFreqs[:,i]).reshape(-1,dim)
-		[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(freqset,natoms)
+		[Fvib, Hvib, Svib,T] = dos.EvaluateDOS(freqset,natoms,tL)
 		print('Done with frequency set', i)
 		FvibAll = np.append(FvibAll, Fvib)
 		HvibAll = np.append(HvibAll, Hvib)
@@ -50,7 +50,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 	for P in Press:
 	#Loop over all T's evaluatied in Thermo (Columns in FvibAll)
 		for i in range(ThermoDim):
-			F_polyfit = np.polyfit(FreqVols, FvibAll[:,i], 2)
+			F_polyfit = np.polyfit(FreqVols, FvibAll[:,i], 1)
 			H_polyfit = np.polyfit(FreqVols, HvibAll[:,i], 2)
 			S_polyfit = np.polyfit(FreqVols, SvibAll[:,i], 2)
 			PolyFvibFunction = np.polyval(F_polyfit,Volumes)
@@ -74,7 +74,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			T_fit = np.polyval(G_polyfit,VGrid)
 			initV = VGrid[np.argmin(T_fit)]
 
-			opt_params = optimize.minimize(PolyGFxn,initV,method='BFGS') #Provides initial Vmin and Gmin for Murnaghan Fit
+			opt_params = optimize.minimize(PolyGFxn,initV,method='Powell') #Provides initial Vmin and Gmin for Murnaghan Fit
 			minimum = opt_params.x[0]
 			minGibbs = opt_params.fun
 
@@ -130,9 +130,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press):
 			Exp_coeffs = optimize.curve_fit(Murnaghan,Exp, GibbsExp,a)[0]
 			Comp_coeffs = optimize.curve_fit(Murnaghan,Comp,GibbsComp,a)[0]
 
-			#OptimalVolume = optimize.brent(DoubleMurn,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),brack=(Vmin,Vmax))
-			#OptimalGibbs = DoubleMurn(OptimalVolume,minimum,minGibbs,Comp_coeffs,Exp_coeffs)
-			OptimalParams = optimize.minimize(DoubleMurn,minimum,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),method='BFGS')
+			OptimalParams = optimize.minimize(DoubleMurn,minimum,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),method='Powell')
 			OptimalVolume = OptimalParams.x[0]
 			OptimalGibbs = OptimalParams.fun
 			OptimalFvib = np.polyval(F_polyfit,OptimalVolume)
