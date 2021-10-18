@@ -98,12 +98,12 @@ def ECAcoustics(atom_IDs,SSFreqFile,ECs,lattice):
 			Christoffel_Mat[2,2] = A_3
 			
 			PhaseVelocity = np.linalg.eig(Christoffel_Mat)[0] # = pv^2
+			PhaseVelocity = abs(PhaseVelocity)
 			kzb = np.linalg.norm(np.matmul(kpt_sampling_directions[i],recip_lattice)) * 1E10 / (2*np.pi) #kzb In 1 / m
 
 			PhaseVelocity = np.transpose(PhaseVelocity)
 			PhaseVelocity = PhaseVelocity / density # -- kg/(m*s^2) / kg/m^3 -> m^2/s^2
 			PhaseVelocity = np.sqrt(PhaseVelocity) # -- m*s^-1 -> Velocity
-			PhaseVelocity = np.real(PhaseVelocity)
 			nan_ind = np.isnan(PhaseVelocity)
 			PhaseVelocity[nan_ind] = 0
 
