@@ -3,6 +3,8 @@ from . import GetDOS as dos
 from scipy import optimize
 import pandas as pd
 
+
+
 def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 	print('STARTING QHA')
 	Na = 6.0221367e23
@@ -14,7 +16,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 	Volumes = ev_curve[:,0]
 	Energies = ev_curve[:,1]
 	Vmin = min(Volumes)
-	Vmax = max(Volumes)
+	Vmax = 1.03 * max(Volumes)
 
 	TArray = []	
 	OptVolArray = []
@@ -28,6 +30,9 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 	HvibAll = []
 	SvibAll = []
 	TAll = []
+
+	##Get initial V for minimumization
+	VGrid = np.arange(Vmin, Vmax, 0.01)
 
 	for i in range(np.size(AllFreqs,1)):
 		freqset = np.array(AllFreqs[:,i]).reshape(-1,dim)
@@ -48,35 +53,35 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 	print('Starting pressure scan...')
 
 	for P in Press:
-	#Loop over all T's evaluatied in Thermo (Columns in FvibAll)
+	#Loop over all T's evaluated in Thermo (Columns in FvibAll)
 		for i in range(ThermoDim):
 			F_polyfit = np.polyfit(FreqVols, FvibAll[:,i], 1)
-			H_polyfit = np.polyfit(FreqVols, HvibAll[:,i], 2)
-			S_polyfit = np.polyfit(FreqVols, SvibAll[:,i], 2)
+			H_polyfit = np.polyfit(FreqVols, HvibAll[:,i], 1)
+			S_polyfit = np.polyfit(FreqVols, SvibAll[:,i], 1)
 			PolyFvibFunction = np.polyval(F_polyfit,Volumes)
 			PV = P * Volumes * 1.0e-24 * Na
 			Gibbs = PolyFvibFunction + Energies + PV
 			G_polyfit = np.polyfit(Volumes,Gibbs,4)
-
-		# EP CHECKER Don't allow the minimum to be on the endpoints
-			MinIndex = np.argmin(Gibbs)
-			if Volumes[MinIndex] == Volumes[-1]:
-				MinIndex = MinIndex - 1
-			elif Volumes[MinIndex] == Volumes[0]:
-				MinIndex = MinIndex + 1
 
 		#Define initial Gibbs curve \\ G(V) 
 			def PolyGFxn(V):
 				return np.polyval(G_polyfit,V)
 		
 			##Get initial V for minimumization
-			VGrid = np.arange(Vmin,Vmax,0.01)
-			T_fit = np.polyval(G_polyfit,VGrid)
-			initV = VGrid[np.argmin(T_fit)]
+			T_fit = np.polyval(G_polyfit,VGrid) ##Pull these for G vs V curves
 
-			opt_params = optimize.minimize(PolyGFxn,initV,method='Powell') #Provides initial Vmin and Gmin for Murnaghan Fit
+			#This is for RAW Gibbs fit
+			#StartCurve = pd.DataFrame({'Volume': VGrid,
+			#					 'Energy': T_fit})
+			#StartCurve.to_csv('Gibbs_curve-{}.csv'.format(TAll[1,i]))
+
+			initV = VGrid[np.argmin(T_fit)]
+			Extrap = round(0.1 * len(VGrid))
+
+			opt_params = optimize.minimize(PolyGFxn,initV,method='Powell') #Provides initial Vmin and Gmin for Murnaghan Fit // Maybe unnecessary?
 			minimum = opt_params.x[0]
 			minGibbs = opt_params.fun
+			MinIndex = (np.abs(VGrid - minimum)).argmin()
 
 		#Murnaghan EOS \\ Check parentheses
 			def Murnaghan(x,c0,c1):
@@ -86,7 +91,7 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 			def DoubleMurn(x,Vmin,Gmin,comp,exp): 
 	
 				def Murnaghan(x,c0,c1):
-					return  x[2] + c0*x[1] * (1 / (c1*(c1 - 1)) * np.power((x[0]/x[1]),1-c1) + 1 / c1 * (x[0]/x[1]) - 1 / (c1-1))
+					return x[2] + c0*x[1] * (1 / (c1*(c1 - 1)) * np.power((x[0]/x[1]),1-c1) + 1 / c1 * (x[0]/x[1]) - 1 / (c1-1))
 				
 				Test = np.zeros((1,3))
 				Test[:,0] = x
@@ -100,20 +105,20 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 				else:
 					ans = Murnaghan(Test[0,:],comp[0],comp[1])
 					out = np.append(out,ans)
-				return out
+				return ans
 
 		#Define Compression and Expansion branches for Double Murn
 			if P < 0.75:
-				VolComp = Volumes[MinIndex - 1:-1]
-				VolExp = Volumes[0:MinIndex  + 6]
-				GibbsComp = Gibbs[MinIndex - 1:-1]
-				GibbsExp = Gibbs[0:MinIndex  + 6]
+				VolExp = VGrid[MinIndex - 4 * Extrap:-1]
+				VolComp = VGrid[0:MinIndex + Extrap]
+				GibbsExp = T_fit[MinIndex - 4 * Extrap:-1]
+				GibbsComp = T_fit[0:MinIndex + Extrap]
 
 			else:
-				VolComp = Volumes[MinIndex - 3:-1]
-				VolExp = Volumes[0:MinIndex  + 1]
-				GibbsComp = Gibbs[MinIndex - 3:-1]
-				GibbsExp = Gibbs[0:MinIndex  + 1]
+				VolExp = VGrid[MinIndex - 5 * Extrap:-1]
+				VolComp = VGrid[0:MinIndex + Extrap]
+				GibbsExp = T_fit[MinIndex - 5 * Extrap:-1]
+				GibbsComp = T_fit[0:MinIndex + Extrap]
 
 		#Get optimized parameters for Compression and Expansion branches
 			a = [5.0,8.0]
@@ -131,12 +136,21 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 			Comp_coeffs = optimize.curve_fit(Murnaghan,Comp,GibbsComp,a)[0]
 
 			OptimalParams = optimize.minimize(DoubleMurn,minimum,args=(minimum,minGibbs,Comp_coeffs,Exp_coeffs),method='Powell')
+
+			#All of this is for Gibbs curves -- uncomment for spreadsheets
+			#Murn = []
+			#for vol in VGrid:
+			#	y = DoubleMurn(vol,minimum,minGibbs,Comp_coeffs,Exp_coeffs)
+			#	t = np.array([vol,y])
+			#	Murn.append(t)
+			#df = pd.DataFrame(Murn,columns=['Volume','Gibbs'])
+			#df.to_csv('Gibbs_curve-{}.csv'.format(TAll[1,i]))
+
 			OptimalVolume = OptimalParams.x[0]
 			OptimalGibbs = OptimalParams.fun
 			OptimalFvib = np.polyval(F_polyfit,OptimalVolume)
 			OptimalSvib = np.polyval(S_polyfit,OptimalVolume)
 			OptimalHvib = np.polyval(H_polyfit,OptimalVolume)
-			#OptimalPV = P * OptimalVolume * 1E-24 * Na
 			OptimalEl = OptimalGibbs - OptimalFvib # - OptimalPV
 
 			TArray = np.append(TArray,TAll[1,i])
@@ -189,7 +203,6 @@ def PhaseTrans(AllData1,AllData2,Press):
 	
 		dS = TransitionEntropy2 - TransitionEntropy1
 		dH = TransitionEnthalpy2 - TransitionEnthalpy1
-		
 
 		T_Trans_Array = np.append(T_Trans_Array, TempTrans)
 		S_Trans_Array = np.append(S_Trans_Array, dS)

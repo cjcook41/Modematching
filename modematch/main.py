@@ -6,7 +6,7 @@ import sys
 def RunJob():
 
 
-	print('ModeMatch v0.0.9')
+	print('ModeMatch v0.0.10')
 	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
 
 

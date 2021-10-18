@@ -96,3 +96,7 @@ v0.0.8
 v0.0.9
 * Added a Tmax parameter to the input file for changing Trange to evaluate
 * Changed to linear extrapolation of Fvib vs. V free energy fitting. The polynomial extrapolation gives erratic behavior if the sampled volume points are not far enough from the minimum. 
+
+v0.0.10
+* Redefined compression and expansion branch evaluation for a finer volume grid. This was done to mitigate the use of fewer points in the initial electronic E(V) curve.
+
