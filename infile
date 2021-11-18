@@ -25,13 +25,11 @@ EC false
 
 
 \$Pmax
-0
+1
 \*
 
 \$Tmax
 300
 \*
 
-\$Tmax
-300
-\*
+
