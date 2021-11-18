@@ -319,19 +319,22 @@ def ElasticConstants(stresses,strains):
 		tmp2 = new_strain[i,:]
 		e_vec = np.append(e_vec,tmp2)
 		if np.mod(i+1,3) == 0:
-		#Test for which strain is being applied
-		#important : determines which C values to evaluate
-		#STRAINS 1 - 6   ->> Triclinic   ; all 6 applied
-		#STRAIN  7       ->> Cubic       ; 2 applied (3 and 4+5+6)
 
-		#strain No  tag1 tag2
-		# 1	 0   2
-		# 2	 2   2
-		# 3	 4   2
-		# 4	 2   4
-		# 5	 4   4
-		# 6	 6   4
-		# 7	 12  12
+			"""
+			Test for which strain is being applied
+			important : determines which C values to evaluate
+			STRAINS 1 - 6   ->> Triclinic   ; all 6 applied
+			STRAIN  7       ->> Cubic       ; 2 applied (3 and 4+5+6)
+	
+			strain No  tag1 tag2
+			 1	 0   2
+			 2	 2   2
+			 3	 4   2
+			 4	 2   4
+			 5	 4   4
+			 6	 6   4
+			 7	 12  12
+			"""
 
 			e_vec = np.reshape(e_vec,(3,3))
 			t_vec = np.reshape(t_vec,(3,3))

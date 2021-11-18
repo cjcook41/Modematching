@@ -42,10 +42,6 @@ def EvaluateDOS(ssfreqs, natoms,tL):
 	#Normalized Density of States 
 	y_0 = y / (np.size(x) * bw * np.sqrt(2 * np.pi))
 
-	#Create plot
-	#axes = plt.gca()
-	#axes.set_xlim([xS,xL])
-	#axes.set_ylim([0,np.amax(y_0)+0.001])
 
 	#Check norm; print A_0 if needed
 	A_0 = 0
