@@ -15,8 +15,18 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 #Curve Data
 	Volumes = ev_curve[:,0]
 	Energies = ev_curve[:,1]
-	Vmin = min(Volumes)
-	Vmax = 1.03 * max(Volumes)
+	Vmin = 0.98 * min(Volumes)
+	Vmax = 1.08 * max(Volumes)
+
+	"""
+	Freqvol Range
+	Larger Fvol_range -> less extrapolation, quadratic fit OK. Not true for narrow ranges
+	"""
+	Fvol_range = (max(FreqVols) - min(FreqVols)) / min(FreqVols)
+	if Fvol_range > 0.1:
+		polydeg = 2
+	else:
+		polydeg = 1
 
 	TArray = []	
 	OptVolArray = []
@@ -55,9 +65,9 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 	for P in Press:
 	#Loop over all T's evaluated in Thermo (Columns in FvibAll)
 		for i in range(ThermoDim):
-			F_polyfit = np.polyfit(FreqVols, FvibAll[:,i], 1)
-			H_polyfit = np.polyfit(FreqVols, HvibAll[:,i], 1)
-			S_polyfit = np.polyfit(FreqVols, SvibAll[:,i], 1)
+			F_polyfit = np.polyfit(FreqVols, FvibAll[:,i], polydeg)
+			H_polyfit = np.polyfit(FreqVols, HvibAll[:,i], polydeg)
+			S_polyfit = np.polyfit(FreqVols, SvibAll[:,i], polydeg)
 			PolyFvibFunction = np.polyval(F_polyfit,Volumes)
 			PV = P * Volumes * 1.0e-24 * Na
 			Gibbs = PolyFvibFunction + Energies + PV
@@ -69,11 +79,6 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 		
 			##Get initial V for minimumization
 			T_fit = np.polyval(G_polyfit,VGrid) ##Pull these for G vs V curves
-
-			#This is for RAW Gibbs fit
-			#StartCurve = pd.DataFrame({'Volume': VGrid,
-			#					 'Energy': T_fit})
-			#StartCurve.to_csv('Gibbs_curve-{}.csv'.format(TAll[1,i]))
 
 			initV = VGrid[np.argmin(T_fit)]
 			Extrap = round(0.1 * len(VGrid))
@@ -97,27 +102,24 @@ def QHA(AllFreqs,FreqVols,ev_curve,count,natoms,Press,tL):
 				Test[:,0] = x
 				Test[:,1] = Vmin
 				Test[:,2] = Gmin
-				out = []
 
 				if x > Vmin:
 					ans = Murnaghan(Test[0,:],exp[0],exp[1])
-					out = np.append(out,ans)
 				else:
 					ans = Murnaghan(Test[0,:],comp[0],comp[1])
-					out = np.append(out,ans)
 				return ans
 
 		#Define Compression and Expansion branches for Double Murn
 			if P < 0.75:
-				VolExp = VGrid[MinIndex - 4 * Extrap:-1]
+				VolExp = VGrid[MinIndex - Extrap:-1]
 				VolComp = VGrid[0:MinIndex + Extrap]
-				GibbsExp = T_fit[MinIndex - 4 * Extrap:-1]
+				GibbsExp = T_fit[MinIndex - Extrap:-1]
 				GibbsComp = T_fit[0:MinIndex + Extrap]
 
 			else:
-				VolExp = VGrid[MinIndex - 5 * Extrap:-1]
+				VolExp = VGrid[MinIndex - int(0.5*Extrap):-1]
 				VolComp = VGrid[0:MinIndex + Extrap]
-				GibbsExp = T_fit[MinIndex - 5 * Extrap:-1]
+				GibbsExp = T_fit[MinIndex - int(0.5*Extrap):-1]
 				GibbsComp = T_fit[0:MinIndex + Extrap]
 
 		#Get optimized parameters for Compression and Expansion branches
@@ -204,9 +206,9 @@ def PhaseTrans(AllData1,AllData2,Press):
 		dS = TransitionEntropy2 - TransitionEntropy1
 		dH = TransitionEnthalpy2 - TransitionEnthalpy1
 
-		T_Trans_Array = np.append(T_Trans_Array, TempTrans)
-		S_Trans_Array = np.append(S_Trans_Array, dS)
-		H_Trans_Array = np.append(H_Trans_Array, dH)
+		T_Trans_Array = np.append(T_Trans_Array, TempTrans.real)
+		S_Trans_Array = np.append(S_Trans_Array, dS.real)
+		H_Trans_Array = np.append(H_Trans_Array, dH.real)
 
 	Phase_Trans_Data = pd.DataFrame({'T_Trans': np.array(T_Trans_Array),
 								 'H_Trans': np.array(H_Trans_Array),
