@@ -100,3 +100,7 @@ v0.0.9
 v0.0.10
 * Redefined compression and expansion branch evaluation for a finer volume grid. This was done to mitigate the use of fewer points in the initial electronic E(V) curve.
 
+v0.0.11
+* Fixed bug for high pressure scan introduced after refining the Vgrid. 
+* Introduced a dependence on relative volume range for determining order of the Fvib(V) fit. Larger range of volumes == quadratic fit, narrower range == linear fit
+
