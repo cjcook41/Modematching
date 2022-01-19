@@ -44,7 +44,7 @@ Modematch can then be installed via pip:
 
 `python setup.py sdist`
 
-`pip install dist/modematch-0.0.7.tar.gz/`
+`pip install dist/modematch-0.0.11.tar.gz/`
 
 
 ## Running the Code
