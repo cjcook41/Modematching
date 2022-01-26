@@ -104,3 +104,5 @@ v0.0.11
 * Fixed bug for high pressure scan introduced after refining the Vgrid. 
 * Introduced a dependence on relative volume range for determining order of the Fvib(V) fit. Larger range of volumes == quadratic fit, narrower range == linear fit
 
+v0.0.12
+* Reworked the fitting and added comments for ElasticConstants solver. Earlier versions used an average over all strains in a grid, new version solves for the inflection point of positive and negative strains. These are more accurate by ~5%. 
