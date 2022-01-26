@@ -61,7 +61,7 @@ Control of elastic calcualations is listed under the `\$acoustics` card. `Christ
 
 ### Phase Diagrams
 For phase diagrams, add another polymorph name under the `\$crystals` card. **NOTE**: The names listed under here will need to be the prefix of the input data files! `\$P2atoms` and `\$P2volumes` will need to be specified as well, containing atomic information and cell volumes of the second polymorph specified. 
-Volume dependent free energies are evaluated at a series of pressures up to `\$Pmax` in GigaPascals (0.01GPa steps),  and temperatures (0 - 500K, 10K steps), and third order polynomial fits are used to determine the transition temperature at some pressure (where relative thermodynamic stability inverts). "No tranition" will result in imaginary temperatures. 
+Volume dependent free energies are evaluated at a series of pressures up to `\$Pmax` in GigaPascals (0.01GPa steps),  and temperatures in Kelvin up to `\$Tmax` (10K steps). If QHA points are in a large sampled volume range, second order polynomial fits are used to determine the transition temperature at some pressure (where relative thermodynamic stability inverts). Smaller volume ranges use linear fits to avoid erratic behavior in the extrapolation region. "No transition" will result in imaginary temperatures. 
 
 ### Sample Input File
 `infile` is a sample input file for Phase I carbon dioxide. This input file will perform the base normal mode shift, evaluate free energies at multiple volumes of an Alpha `xtal`, evaluate the corrected acoustic modes using pre-calculated elastic constants, and finally perform the quasiharmonic approximation for thermal expansion. 
@@ -69,7 +69,7 @@ Volume dependent free energies are evaluated at a series of pressures up to `\$P
 
 ### Outputs
 * For 1 polymorph, 1 volume (No QHA):
-  * Thermodynamic data / absolulte free energies
+  * Thermodynamic data / absolute free energies
 
 * 1 polymorph, multiple volumes (QHA):
   * `xtal.csv` file containing relevent free energies and predicted cell volumes as a function of T
@@ -80,7 +80,7 @@ Volume dependent free energies are evaluated at a series of pressures up to `\$P
   
  
 ## Additional Consideration
-As of now, Modematching does not account for uniform kpt sampling. The supercell phonons must be along user-defined kpaths within the Brillouin zone. This supplies he code with the well-defined bands to shift during the matching procedure. Future versions will implement uniform sampling.
+Modematching does not account for uniform kpt sampling. The supercell phonons must be along user-defined kpaths within the Brillouin zone. This supplies the code with the well-defined bands to shift during the matching procedure. Future versions will implement uniform sampling.
 
  
 ## Citation
