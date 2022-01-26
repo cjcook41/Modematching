@@ -6,11 +6,11 @@ import sys
 def RunJob():
 
 
-	print('ModeMatching v0.0.11')
+	print('ModeMatching v0.0.12')
 	sys.setrecursionlimit(3000) ## DEFAULT RECURSION LIM HIT WITH STABLE MARRIAGE MATCHING ALG
 
 
-	job_description = data.ReadIFile('infile') #Chnge this when im done(?)
+	job_description = data.ReadIFile('infile')
 	job_params = job_description.get_data()
 
 	P1atom_IDs = job_params[0]

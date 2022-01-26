@@ -2,8 +2,29 @@ import numpy as np
 from . import ReadData as data
 from sympy import *
 
-def ElasticConstants(stresses,strains):
+def finitediff(C,strains):
+	deriv = []
+	signchange = []
+	inflection = []
+	for i in range(len(C) - 1):
+		d = (C[i + 1] - C[i]) / (strains[i + 1] - strains[i])
+		deriv.append(d)
+		if i != 0:
+			check = np.sign(deriv[i]-deriv[i-1])
+			signchange.append(check)
+			if len(signchange) != 1:
+				if (signchange[-2] != signchange[-1]):
+					inflection.append(C[i])
+	inflection = inflection[:-1]
+	if not d:
+		C_mid = 0
+	else:
+		C_mid = (inflection[0] + inflection[1]) / 2
+	#print(C_mid)
+	return C_mid
 
+
+def ElasticConstants(stresses,strains):
 	stresses = data.ReadElastic(stresses)
 	strains = data.ReadElastic(strains)
 	
@@ -374,7 +395,6 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec 
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C12, C22, C23, C24, C25, C26])
-				C12_.append(ans[C12])
 				C22_.append(ans[C22])
 				C23_.append(ans[C23])
 				C24_.append(ans[C24])
@@ -392,8 +412,6 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec 
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C13, C23, C33, C34, C35, C36])
-				C13_.append(ans[C13])
-				C23_.append(ans[C23])
 				C33_.append(ans[C33])
 				C34_.append(ans[C34])
 				C35_.append(ans[C35])
@@ -410,11 +428,6 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C16, C26, C36, C46, C56, C66])
-				C16_.append(ans[C16])
-				C26_.append(ans[C26])
-				C36_.append(ans[C36])
-				C46_.append(ans[C46])
-				C56_.append(ans[C56])
 				C66_.append(ans[C66])
 				t_vec = []
 				e_vec = []
@@ -428,10 +441,6 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C15, C25, C35, C45, C55, C56])
-				C15_.append(ans[C15])
-				C25_.append(ans[C25])
-				C35_.append(ans[C35])
-				C45_.append(ans[C45])
 				C55_.append(ans[C55])
 				C56_.append(ans[C56])
 				t_vec = []
@@ -446,9 +455,6 @@ def ElasticConstants(stresses,strains):
 				eqs = EC_matrix.multiply(e_vec)
 				eqs = eqs - t_vec
 				ans = solve([eqs[0], eqs[1], eqs[2], eqs[3], eqs[4], eqs[5]], [C14, C24, C34, C44, C45, C46])
-				C14_.append(ans[C14])
-				C24_.append(ans[C24])
-				C34_.append(ans[C34])
 				C44_.append(ans[C44])
 				C45_.append(ans[C45])
 				C46_.append(ans[C46])
@@ -520,41 +526,35 @@ def ElasticConstants(stresses,strains):
 			
 	
 
-	#Strain1
-	#Cij == Cji, double ct
-	C11 = sum(C11_) / len(C11_) #/ 2
-	C12 = sum(C12_) / len(C12_) * 2
-	C13 = sum(C13_) / len(C13_) * 2
-	C14 = sum(C14_) / len(C14_) * 2
-	C15 = sum(C15_) / len(C15_) * 2
-	C16 = sum(C16_) / len(C16_) * 2
+	C11 = finitediff(C11_,e_range)
+	C12 = finitediff(C12_,e_range)
+	C13 = finitediff(C13_,e_range)
+	C14 = finitediff(C14_,e_range)
+	C15 = finitediff(C15_,e_range)
+	C16 = finitediff(C16_,e_range)
 
-	#Strain2
-	C22 = sum(C22_) / len(C22_) #/ 2
-	C23 = sum(C23_) / len(C23_) * 2
-	C24 = sum(C24_) / len(C24_) * 2
-	C25 = sum(C25_) / len(C25_) * 2
-	C26 = sum(C26_) / len(C26_) * 2
+	C22 = finitediff(C22_,e_range)
+	C23 = finitediff(C23_,e_range)
+	C24 = finitediff(C24_,e_range)
+	C25 = finitediff(C25_,e_range)
+	C26 = finitediff(C26_,e_range)
 
-	#Strain3
-	C33 = sum(C33_) / len(C33_) #/ 2
-	C34 = sum(C34_) / len(C34_) * 2
-	C35 = sum(C35_) / len(C35_) * 2
-	C36 = sum(C36_) / len(C36_) * 2
+	C33 = finitediff(C33_,e_range)
+	C34 = finitediff(C34_,e_range)
+	C35 = finitediff(C35_,e_range)
+	C36 = finitediff(C36_,e_range)
 
-	#Strain4
-	C66 = sum(C66_) / len(C66_) #/ 2
+	C66 = finitediff(C66_,e_range)
 
-	#Strain5
-	C55 = sum(C55_) / len(C55_) #/ 2
-	C56 = sum(C56_) / len(C56_) * 2
+	C55 = finitediff(C55_,e_range)
+	C56 = finitediff(C56_,e_range)
 
-	#Strain6
-	C44 = sum(C44_) / len(C44_) #/ 2
-	C45 = sum(C45_) / len(C45_) * 2
-	C46 = sum(C46_) / len(C46_) * 2
+	C44 = finitediff(C44_,e_range)
+	C45 = finitediff(C45_,e_range)
+	C46 = finitediff(C46_,e_range)
+
 
 	EC_matrix = np.array([[C11, C12, C13, C14, C15, C16],[C12, C22, C23, C24, C25, C26], [C13, C23, C33, C34, C35, C36],[C14, C24, C34, C44, C45, C46],[C15, C25, C35, C45, C55, C56],[C16, C26, C36, C46, C56, C66]])
-	EC_matrix = -(EC_matrix)
+	EC_matrix = -(EC_matrix) #Hooke's Law
 
 	return EC_matrix
